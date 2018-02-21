@@ -1,0 +1,83 @@
+{
+  "solace-messaging": [
+    {
+      "credentials": {
+        "activeManagementHostname": "shared-vmr-0.local.pcfdev.io",
+        "amqpTlsUris": [
+          "amqps://10.244.0.3:7108"
+        ],
+        "amqpUris": [
+          "amqp://10.244.0.3:7107"
+        ],
+        "clientPassword": "dbb7257d-ecf7-4b0f-8aee-cd4bbdf0e772",
+        "clientUsername": "default.cu000021",
+        "jmsJndiTlsUris": [
+          "smfs://10.244.0.3:7004"
+        ],
+        "jmsJndiUris": [
+          "smf://dev2-92"
+        ],
+        "managementHostnames": [
+          "shared-vmr-0.local.pcfdev.io"
+        ],
+        "managementPassword": "bf812593c1f047f3b7864667922a3c85",
+        "managementUsername": "default-mgmt",
+        "mqttTlsUris": [
+          "ssl://10.244.0.3:7104"
+        ],
+        "mqttUris": [
+          "tcp://10.244.0.3:7103"
+        ],
+        "mqttWsUris": [
+          "ws://10.244.0.3:7105"
+        ],
+        "mqttWssUris": [
+          "wss://10.244.0.3:7106"
+        ],
+        "msgVpnName": "default",
+        "restTlsUris": [
+          "https://10.244.0.3:7102"
+        ],
+        "restUris": [
+          "http://10.244.0.3:7101"
+        ],
+        "smfHosts": [
+          "tcp://dev2-92"
+        ],
+        "smfTlsHosts": [
+          "tcps://10.244.0.3:7004"
+        ],
+        "smfZipHosts": [
+          "tcp://10.244.0.3:7002"
+        ],
+        "webMessagingTlsUris": [
+          "https://10.244.0.3:7006"
+        ],
+        "webMessagingUris": [
+          "http://10.244.0.3:7005"
+        ]
+      },
+      "label": "solace-messaging",
+      "name": "solace-messaging-sample-instance",
+      "plan": "shared",
+      "provider": null,
+      "syslog_drain_url": null,
+      "tags": [
+        "solace",
+        "solace-messaging",
+        "rest",
+        "mqtt",
+        "mq",
+        "queue",
+        "event-streaming",
+        "amqp",
+        "jms",
+        "messaging",
+        "publish-subscribe",
+        "message-queuing",
+        "request-reply"
+      ],
+      "volume_mounts": []
+    }
+  ]
+}
