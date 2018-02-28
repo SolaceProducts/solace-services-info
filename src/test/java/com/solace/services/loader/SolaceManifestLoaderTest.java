@@ -51,7 +51,7 @@ public class SolaceManifestLoaderTest {
     private static final String resourcesDir = "src/test/resources/";
     private static final Logger logger = LogManager.getLogger(SolaceManifestLoaderTest.class);
     private static String testServiceManifest;
-    private static List<SimpleEntry<SolaceManifestLoader.ManifestSource, SolaceEnv>> searchesQueries;
+    private static List<SimpleEntry<ManifestSource, SolaceEnv>> searchesQueries;
 
     @Parameters(name = "{0}")
     public static Collection<Object[]> parameterData() {
@@ -81,8 +81,13 @@ public class SolaceManifestLoaderTest {
     }
 
     @Before
-    public void setupLoader() {
+    public void setup() {
         manifestLoader = new SolaceManifestLoader(searchesQueries);
+
+        for (SolaceEnv env : SolaceEnv.values()) {
+            System.clearProperty(env.name());
+            environmentVariables.clear(env.name());
+        }
     }
 
     @Test
