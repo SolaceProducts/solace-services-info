@@ -27,8 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.solace.services.loader.SolaceManifestLoader.MANIFEST_FILE_NAME;
-import static com.solace.services.loader.SolaceManifestLoader.SOLACE_SERVICES_HOME;
-import static com.solace.services.loader.SolaceManifestLoader.SOLCAP_SERVICES;
+import static com.solace.services.loader.SolaceManifestLoader.SolaceEnv;
 import static com.solace.services.loader.SolaceManifestLoader.ManifestSource;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -52,24 +51,24 @@ public class SolaceManifestLoaderTest {
     private static final String resourcesDir = "src/test/resources/";
     private static final Logger logger = LogManager.getLogger(SolaceManifestLoaderTest.class);
     private static String testServiceManifest;
-    private static List<SimpleEntry<SolaceManifestLoader.ManifestSource, String>> searchesQueries;
+    private static List<SimpleEntry<SolaceManifestLoader.ManifestSource, SolaceEnv>> searchesQueries;
 
     @Parameters(name = "{0}")
     public static Collection<Object[]> parameterData() {
         searchesQueries = new LinkedList<>();
-        searchesQueries.add(new SimpleEntry<>(ManifestSource.JVM, SOLCAP_SERVICES));
-        searchesQueries.add(new SimpleEntry<>(ManifestSource.ENV, SOLCAP_SERVICES));
-        searchesQueries.add(new SimpleEntry<>(ManifestSource.FILE, SOLACE_SERVICES_HOME));
+        searchesQueries.add(new SimpleEntry<>(ManifestSource.JVM, SolaceEnv.SOLCAP_SERVICES));
+        searchesQueries.add(new SimpleEntry<>(ManifestSource.ENV, SolaceEnv.SOLCAP_SERVICES));
+        searchesQueries.add(new SimpleEntry<>(ManifestSource.FILE, SolaceEnv.SOLACE_SERVICES_HOME));
 
-        HashMap<String, Set<ManifestSource>> envPropertySources = new HashMap<>();
-        for (Map.Entry<ManifestSource, String> entry : searchesQueries) {
-            if (!envPropertySources.containsKey(entry.getValue()))
-                envPropertySources.put(entry.getValue(), new HashSet<ManifestSource>());
-            envPropertySources.get(entry.getValue()).add(entry.getKey());
+        HashMap<String, Set<ManifestSource>> invertedQueries = new HashMap<>();
+        for (Map.Entry<ManifestSource, SolaceEnv> entry : searchesQueries) {
+            String solaceEnv = entry.getValue().name();
+            if (!invertedQueries.containsKey(solaceEnv)) invertedQueries.put(solaceEnv, new HashSet<ManifestSource>());
+            invertedQueries.get(solaceEnv).add(entry.getKey());
         }
 
         Set<Object[]> parameters = new HashSet<>();
-        for (Map.Entry<String, Set<ManifestSource>> entry : envPropertySources.entrySet())
+        for (Map.Entry<String, Set<ManifestSource>> entry : invertedQueries.entrySet())
             parameters.add(new Object[]{entry.getKey(), entry.getValue()});
 
         return parameters;
@@ -93,7 +92,7 @@ public class SolaceManifestLoaderTest {
 
     @Test
     public void testJvmSolo() {
-        assumeTrue(manifestSource.contains(ManifestSource.JVM));
+        assumeTrue("Not a JVM query", manifestSource.contains(ManifestSource.JVM));
         logger.info(String.format("Testing JVM Property %s ", sourceName));
 
         System.setProperty(sourceName, testServiceManifest);
@@ -103,7 +102,7 @@ public class SolaceManifestLoaderTest {
 
     @Test
     public void testEnvSolo() {
-        assumeTrue(manifestSource.contains(ManifestSource.ENV));
+        assumeTrue("Not an ENV query", manifestSource.contains(ManifestSource.ENV));
         logger.info(String.format("Testing OS Environment %s ", sourceName));
 
         environmentVariables.set(sourceName, testServiceManifest);
@@ -113,7 +112,7 @@ public class SolaceManifestLoaderTest {
 
     @Test
     public void testFileSolo() throws IOException {
-        assumeTrue(manifestSource.contains(ManifestSource.FILE));
+        assumeTrue("Not a FILE query", manifestSource.contains(ManifestSource.FILE));
         String dirPath = tmpFolder.getRoot().getAbsolutePath();
 
         File manifestFile = tmpFolder.newFile(MANIFEST_FILE_NAME);
@@ -157,7 +156,7 @@ public class SolaceManifestLoaderTest {
 
     @Test
     public void testFileNotExist() {
-        assumeTrue(manifestSource.contains(ManifestSource.FILE));
+        assumeTrue("Not a FILE query", manifestSource.contains(ManifestSource.FILE));
         String dirPath = tmpFolder.getRoot().getAbsolutePath();
 
         logger.info(String.format("Testing JVM Property %s ", sourceName));

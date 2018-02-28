@@ -14,26 +14,24 @@ import java.util.List;
 
 class SolaceManifestLoader {
     enum ManifestSource {JVM, ENV, FILE}
+    enum SolaceEnv {SOLACE_CREDENTIALS, SOLCAP_SERVICES, SOLACE_SERVICES_HOME}
 
-    static final String SOLACE_CREDENTIALS = "SOLACE_CREDENTIALS";
-    static final String SOLCAP_SERVICES = "SOLCAP_SERVICES";
-    static final String SOLACE_SERVICES_HOME = "SOLACE_SERVICES_HOME";
     static final String MANIFEST_FILE_NAME = ".solaceservices";
     private static final Logger logger = LogManager.getLogger(SolaceManifestLoader.class);
 
-    private List<SimpleEntry<ManifestSource, String>> searchesQueries;
+    private List<SimpleEntry<ManifestSource, SolaceEnv>> searchesQueries;
 
     public SolaceManifestLoader() {
         searchesQueries = new LinkedList<>();
-        searchesQueries.add(new SimpleEntry<>(ManifestSource.JVM, SOLACE_CREDENTIALS));
-        searchesQueries.add(new SimpleEntry<>(ManifestSource.JVM, SOLCAP_SERVICES));
-        searchesQueries.add(new SimpleEntry<>(ManifestSource.ENV, SOLACE_CREDENTIALS));
-        searchesQueries.add(new SimpleEntry<>(ManifestSource.ENV, SOLCAP_SERVICES));
-        searchesQueries.add(new SimpleEntry<>(ManifestSource.FILE, SOLACE_SERVICES_HOME));
+        searchesQueries.add(new SimpleEntry<>(ManifestSource.JVM, SolaceEnv.SOLACE_CREDENTIALS));
+        searchesQueries.add(new SimpleEntry<>(ManifestSource.JVM, SolaceEnv.SOLCAP_SERVICES));
+        searchesQueries.add(new SimpleEntry<>(ManifestSource.ENV, SolaceEnv.SOLACE_CREDENTIALS));
+        searchesQueries.add(new SimpleEntry<>(ManifestSource.ENV, SolaceEnv.SOLCAP_SERVICES));
+        searchesQueries.add(new SimpleEntry<>(ManifestSource.FILE, SolaceEnv.SOLACE_SERVICES_HOME));
     }
 
     // For Testing
-    SolaceManifestLoader(List<SimpleEntry<ManifestSource, String>> searchesQueries) {
+    SolaceManifestLoader(List<SimpleEntry<ManifestSource, SolaceEnv>> searchesQueries) {
         this.searchesQueries = searchesQueries;
     }
 
@@ -43,22 +41,22 @@ class SolaceManifestLoader {
      * @return A JSON string representing a service manifest, null if not found.
      */
     public String getManifest() {
-        String manifest = null;
-        for (SimpleEntry<ManifestSource, String> searchQuery : searchesQueries) {
-            String sourceName = searchQuery.getValue();
+        String content = null;
+        for (SimpleEntry<ManifestSource, SolaceEnv> searchQuery : searchesQueries) {
+            String sourceName = searchQuery.getValue().name();
             switch (searchQuery.getKey()) {
-                case JVM: manifest = System.getProperty(sourceName, null); break;
-                case ENV: manifest = System.getenv(sourceName); break;
-                case FILE: manifest = readFile(getPathFromJvmOrEnv(sourceName), MANIFEST_FILE_NAME); break;
+                case JVM: content = System.getProperty(sourceName, null); break;
+                case ENV: content = System.getenv(sourceName); break;
+                case FILE: content = readFile(getPathFromJvmOrEnv(sourceName), MANIFEST_FILE_NAME); break;
             }
 
-            if (sourceName.equals(SOLACE_CREDENTIALS) && manifest!= null && !manifest.isEmpty()) {
-                // Manifest actually had cloud credentials instead of an actual manifest.
-                // Need to query the cloud environment to get the real manifest.
-                manifest = getManifestFromCredentials(manifest);
+            if (content!= null && !content.isEmpty()) { // Content mutation
+                switch (searchQuery.getValue()) {
+                    case SOLACE_CREDENTIALS: content = getManifestFromCredentials(content); break;
+                }
             }
 
-            if (manifest != null && !manifest.isEmpty()) return manifest;
+            if (content != null && !content.isEmpty()) return content;
         }
 
         return null;
