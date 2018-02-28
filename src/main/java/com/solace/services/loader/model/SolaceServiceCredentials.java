@@ -1,5 +1,7 @@
 package com.solace.services.loader.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -7,25 +9,26 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.List;
 
-/*
+/**
  * A POJO to wrap the SolaceMessaging Cloud Foundry Service. This class provides easy access to all of the information
- * in the SCLOUD_SERVICES without extra dependencies on any Solace Enterprise APIs.
+ * in SOLCAP_SERVICES without extra dependencies on any Solace Enterprise APIs.
  *
  * For more details see the GitHub project:
  *    - https://github.com/SolaceProducts/sl-solace-messaging-service-info
  *
  */
-public class SolaceServiceInfo {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class SolaceServiceCredentials {
 
-    private String id;
+    @JsonIgnore private String id; //TODO Do we actually need this?
     private String clientUsername;
     private String clientPassword;
     private String msgVpnName;
-    private String smfHost;
-    private String smfTlsHost;
-    private String smfZipHost;
-    private String jmsJndiUri;
-    private String jmsJndiTlsUri;
+    private List<String> smfHosts;
+    private List<String> smfTlsHosts;
+    private List<String> smfZipHosts;
+    private List<String> jmsJndiUris;
+    private List<String> jmsJndiTlsUris;
     private List<String> restUris;
     private List<String> restTlsUris;
     private List<String> amqpUris;
@@ -71,44 +74,44 @@ public class SolaceServiceInfo {
         this.msgVpnName = msgVpnName;
     }
 
-    public String getSmfHost() {
-        return smfHost;
+    public List<String> getSmfHosts() {
+        return smfHosts;
     }
 
-    public void setSmfHost(String smfHost) {
-        this.smfHost = smfHost;
+    public void setSmfHosts(List<String> smfHosts) {
+        this.smfHosts = smfHosts;
     }
 
-    public String getSmfTlsHost() {
-        return smfTlsHost;
+    public List<String> getSmfTlsHosts() {
+        return smfTlsHosts;
     }
 
-    public void setSmfTlsHost(String smfTlsHost) {
-        this.smfTlsHost = smfTlsHost;
+    public void setSmfTlsHosts(List<String> smfTlsHosts) {
+        this.smfTlsHosts = smfTlsHosts;
     }
 
-    public String getSmfZipHost() {
-        return smfZipHost;
+    public List<String> getSmfZipHosts() {
+        return smfZipHosts;
     }
 
-    public void setSmfZipHost(String smfZipHost) {
-        this.smfZipHost = smfZipHost;
+    public void setSmfZipHosts(List<String> smfZipHosts) {
+        this.smfZipHosts = smfZipHosts;
     }
 
-    public String getJmsJndiUri() {
-        return jmsJndiUri;
+    public List<String> getJmsJndiUris() {
+        return jmsJndiUris;
     }
 
-    public void setJmsJndiUri(String jmsJndiUri) {
-        this.jmsJndiUri = jmsJndiUri;
+    public void setJmsJndiUris(List<String> jmsJndiUris) {
+        this.jmsJndiUris = jmsJndiUris;
     }
 
-    public String getJmsJndiTlsUri() {
-        return jmsJndiTlsUri;
+    public List<String> getJmsJndiTlsUris() {
+        return jmsJndiTlsUris;
     }
 
-    public void setJmsJndiTlsUri(String jmsJndiTlsUri) {
-        this.jmsJndiTlsUri = jmsJndiTlsUri;
+    public void setJmsJndiTlsUris(List<String> jmsJndiTlsUris) {
+        this.jmsJndiTlsUris = jmsJndiTlsUris;
     }
 
     public List<String> getRestUris() {
@@ -219,11 +222,11 @@ public class SolaceServiceInfo {
                 .append("clientUsername", clientUsername)
                 .append("clientPassword", clientPassword)
                 .append("msgVpnName", msgVpnName)
-                .append("smfHost", smfHost)
-                .append("smfTlsHost", smfTlsHost)
-                .append("smfZipHost", smfZipHost)
-                .append("jmsJndiUri", jmsJndiUri)
-                .append("jmsJndiTlsUri", jmsJndiTlsUri)
+                .append("smfHosts", smfHosts)
+                .append("smfTlsHosts", smfTlsHosts)
+                .append("smfZipHosts", smfZipHosts)
+                .append("jmsJndiUris", jmsJndiUris)
+                .append("jmsJndiTlsUris", jmsJndiTlsUris)
                 .append("restUris", restUris)
                 .append("restTlsUris", restTlsUris)
                 .append("amqpUris", amqpUris)
@@ -251,11 +254,11 @@ public class SolaceServiceInfo {
                 .append(clientUsername)
                 .append(clientPassword)
                 .append(msgVpnName)
-                .append(smfHost)
-                .append(smfTlsHost)
-                .append(smfZipHost)
-                .append(jmsJndiUri)
-                .append(jmsJndiTlsUri)
+                .append(smfHosts)
+                .append(smfTlsHosts)
+                .append(smfZipHosts)
+                .append(jmsJndiUris)
+                .append(jmsJndiTlsUris)
                 .append(restUris)
                 .append(restTlsUris)
                 .append(amqpUris)
@@ -284,17 +287,17 @@ public class SolaceServiceInfo {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        SolaceServiceInfo other = (SolaceServiceInfo) obj;
+        SolaceServiceCredentials other = (SolaceServiceCredentials) obj;
         return new EqualsBuilder()
                 .append(id, other.id)
                 .append(clientUsername, other.clientUsername)
                 .append(clientPassword, other.clientPassword)
                 .append(msgVpnName, other.msgVpnName)
-                .append(smfHost, other.smfHost)
-                .append(smfTlsHost, other.smfTlsHost)
-                .append(smfZipHost, other.smfZipHost)
-                .append(jmsJndiUri, other.jmsJndiUri)
-                .append(jmsJndiTlsUri, other.jmsJndiTlsUri)
+                .append(smfHosts, other.smfHosts)
+                .append(smfTlsHosts, other.smfTlsHosts)
+                .append(smfZipHosts, other.smfZipHosts)
+                .append(jmsJndiUris, other.jmsJndiUris)
+                .append(jmsJndiTlsUris, other.jmsJndiTlsUris)
                 .append(restUris, other.restUris)
                 .append(restTlsUris, other.restTlsUris)
                 .append(amqpUris, other.amqpUris)

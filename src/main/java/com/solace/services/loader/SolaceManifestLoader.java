@@ -15,7 +15,7 @@ import java.util.List;
 class SolaceManifestLoader {
     enum ManifestSource {JVM, ENV, FILE}
 
-    static final String VCAP_SERVICES = "VCAP_SERVICES";
+    static final String SOLACE_CREDENTIALS = "SOLACE_CREDENTIALS";
     static final String SOLCAP_SERVICES = "SOLCAP_SERVICES";
     static final String SOLACE_SERVICES_HOME = "SOLACE_SERVICES_HOME";
     static final String MANIFEST_FILE_NAME = ".solaceservices";
@@ -25,9 +25,9 @@ class SolaceManifestLoader {
 
     public SolaceManifestLoader() {
         searchesQueries = new LinkedList<>();
-        searchesQueries.add(new SimpleEntry<>(ManifestSource.JVM, VCAP_SERVICES));
+        searchesQueries.add(new SimpleEntry<>(ManifestSource.JVM, SOLACE_CREDENTIALS));
         searchesQueries.add(new SimpleEntry<>(ManifestSource.JVM, SOLCAP_SERVICES));
-        searchesQueries.add(new SimpleEntry<>(ManifestSource.ENV, VCAP_SERVICES));
+        searchesQueries.add(new SimpleEntry<>(ManifestSource.ENV, SOLACE_CREDENTIALS));
         searchesQueries.add(new SimpleEntry<>(ManifestSource.ENV, SOLCAP_SERVICES));
         searchesQueries.add(new SimpleEntry<>(ManifestSource.FILE, SOLACE_SERVICES_HOME));
     }
@@ -38,9 +38,9 @@ class SolaceManifestLoader {
     }
 
     /**
-     * Finds and loads a manifest from Solace Cloud in the precedence defined in the search queries.
+     * Finds and loads a manifest from the application's environment as per the precedence defined in the search queries.
      * The manifest contents are retrieved <emphasis>as is</emphasis> and is not checked for validity.
-     * @return A JSON string representing a service manifest or null if not found.
+     * @return A JSON string representing a service manifest, null if not found.
      */
     public String getManifest() {
         String manifest = null;
@@ -50,6 +50,12 @@ class SolaceManifestLoader {
                 case JVM: manifest = System.getProperty(sourceName, null); break;
                 case ENV: manifest = System.getenv(sourceName); break;
                 case FILE: manifest = readFile(getPathFromJvmOrEnv(sourceName), MANIFEST_FILE_NAME); break;
+            }
+
+            if (sourceName.equals(SOLACE_CREDENTIALS) && manifest!= null && !manifest.isEmpty()) {
+                // Manifest actually had cloud credentials instead of an actual manifest.
+                // Need to query the cloud environment to get the real manifest.
+                manifest = getManifestFromCredentials(manifest);
             }
 
             if (manifest != null && !manifest.isEmpty()) return manifest;
@@ -82,5 +88,10 @@ class SolaceManifestLoader {
         }
 
         return fileContents;
+    }
+
+    private String getManifestFromCredentials(String credentials) {
+        String manifest = "";
+        return manifest;
     }
 }

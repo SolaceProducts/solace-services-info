@@ -7,40 +7,40 @@ import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 
-public class SolaceServiceInfoTest {
+public class SolaceServiceCredentialsTest {
 
     @Test
-    public void equalTest() {
-        SolaceServiceInfo ssi = getTestSolaceServiceInfo();
-        SolaceServiceInfo otherSsi = getTestSolaceServiceInfo();
+    public void testEqual() {
+        SolaceServiceCredentials ssi = getTestSolaceServiceInfo();
+        SolaceServiceCredentials otherSsi = getTestSolaceServiceInfo();
         assertEquals(ssi, otherSsi);
     }
 
     @Test
-    public void hashCodeTest() {
-        SolaceServiceInfo ssi = getTestSolaceServiceInfo();
-        SolaceServiceInfo otherSsi = getTestSolaceServiceInfo();
+    public void testHashCode() {
+        SolaceServiceCredentials ssi = getTestSolaceServiceInfo();
+        SolaceServiceCredentials otherSsi = getTestSolaceServiceInfo();
         assertEquals(ssi.hashCode(), otherSsi.hashCode());
     }
 
     @Test
-    public void toStringTest() {
-        SolaceServiceInfo ssi = getTestSolaceServiceInfo();
-        SolaceServiceInfo otherSsi = getTestSolaceServiceInfo();
+    public void testToString() {
+        SolaceServiceCredentials ssi = getTestSolaceServiceInfo();
+        SolaceServiceCredentials otherSsi = getTestSolaceServiceInfo();
         assertEquals(ssi.toString(), otherSsi.toString());
     }
 
-    private SolaceServiceInfo getTestSolaceServiceInfo() {
-        SolaceServiceInfo ssi = new SolaceServiceInfo();
+    private SolaceServiceCredentials getTestSolaceServiceInfo() {
+        SolaceServiceCredentials ssi = new SolaceServiceCredentials();
         ssi.setId("full-credentials-instance");
         ssi.setClientUsername("sample-client-username");
         ssi.setClientPassword("sample-client-password");
         ssi.setMsgVpnName("sample-msg-vpn");
-        ssi.setSmfHost("tcp://192.168.1.50:7000");
-        ssi.setSmfTlsHost("tcps://192.168.1.50:7003");
-        ssi.setSmfZipHost("tcp://192.168.1.50:7001");
-        ssi.setJmsJndiUri("smf://192.168.1.50:7000");
-        ssi.setJmsJndiTlsUri("smfs://192.168.1.50:7003");
+        ssi.setSmfHosts(Collections.singletonList("tcp://192.168.1.50:7000"));
+        ssi.setSmfTlsHosts(Collections.singletonList("tcps://192.168.1.50:7003"));
+        ssi.setSmfZipHosts(Collections.singletonList("tcp://192.168.1.50:7001"));
+        ssi.setJmsJndiUris(Collections.singletonList("smf://192.168.1.50:7000"));
+        ssi.setJmsJndiTlsUris(Collections.singletonList("smfs://192.168.1.50:7003"));
         ssi.setMqttUris(Collections.singletonList("tcp://192.168.1.50:7020"));
         ssi.setMqttTlsUris(Arrays.asList("ssl://192.168.1.50:7021", "ssl://192.168.1.51:7021"));
         ssi.setMqttWsUris(Collections.singletonList("ws://192.168.1.50:7022"));

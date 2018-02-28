@@ -29,7 +29,6 @@ import java.util.Set;
 import static com.solace.services.loader.SolaceManifestLoader.MANIFEST_FILE_NAME;
 import static com.solace.services.loader.SolaceManifestLoader.SOLACE_SERVICES_HOME;
 import static com.solace.services.loader.SolaceManifestLoader.SOLCAP_SERVICES;
-import static com.solace.services.loader.SolaceManifestLoader.VCAP_SERVICES;
 import static com.solace.services.loader.SolaceManifestLoader.ManifestSource;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -58,9 +57,7 @@ public class SolaceManifestLoaderTest {
     @Parameters(name = "{0}")
     public static Collection<Object[]> parameterData() {
         searchesQueries = new LinkedList<>();
-        searchesQueries.add(new SimpleEntry<>(ManifestSource.JVM, VCAP_SERVICES));
         searchesQueries.add(new SimpleEntry<>(ManifestSource.JVM, SOLCAP_SERVICES));
-        searchesQueries.add(new SimpleEntry<>(ManifestSource.ENV, VCAP_SERVICES));
         searchesQueries.add(new SimpleEntry<>(ManifestSource.ENV, SOLCAP_SERVICES));
         searchesQueries.add(new SimpleEntry<>(ManifestSource.FILE, SOLACE_SERVICES_HOME));
 
@@ -90,12 +87,12 @@ public class SolaceManifestLoaderTest {
     }
 
     @Test
-    public void blankSourcesTest() {
+    public void testBlankSources() {
         assertNull(manifestLoader.getManifest());
     }
 
     @Test
-    public void jvmSoloTest() {
+    public void testJvmSolo() {
         assumeTrue(manifestSource.contains(ManifestSource.JVM));
         logger.info(String.format("Testing JVM Property %s ", sourceName));
 
@@ -105,7 +102,7 @@ public class SolaceManifestLoaderTest {
     }
 
     @Test
-    public void envSoloTest() {
+    public void testEnvSolo() {
         assumeTrue(manifestSource.contains(ManifestSource.ENV));
         logger.info(String.format("Testing OS Environment %s ", sourceName));
 
@@ -115,7 +112,7 @@ public class SolaceManifestLoaderTest {
     }
 
     @Test
-    public void fileSoloTest() throws IOException {
+    public void testFileSolo() throws IOException {
         assumeTrue(manifestSource.contains(ManifestSource.FILE));
         String dirPath = tmpFolder.getRoot().getAbsolutePath();
 
@@ -126,7 +123,7 @@ public class SolaceManifestLoaderTest {
         System.setProperty(sourceName, dirPath);
         assertNotNull(System.getProperty(sourceName));
         assertEquals(manifestLoader.getManifest(), testServiceManifest);
-        logger.info(String.format("Cleared JVM Environment %s ", sourceName));
+        logger.info(String.format("Cleared JVM Property %s ", sourceName));
         System.clearProperty(sourceName);
 
         logger.info(String.format("Testing OS Environment %s ", sourceName));
@@ -147,7 +144,7 @@ public class SolaceManifestLoaderTest {
         System.setProperty(sourceName, dirPath);
         assertNotNull(System.getProperty(sourceName));
         assertEquals(manifestLoader.getManifest(), newTestManifest);
-        logger.info(String.format("Cleared JVM Environment %s ", sourceName));
+        logger.info(String.format("Cleared JVM Property %s ", sourceName));
         System.clearProperty(sourceName);
 
         logger.info(String.format("Testing OS Environment %s with modified manifest", sourceName));
@@ -159,8 +156,27 @@ public class SolaceManifestLoaderTest {
     }
 
     @Test
+    public void testFileNotExist() {
+        assumeTrue(manifestSource.contains(ManifestSource.FILE));
+        String dirPath = tmpFolder.getRoot().getAbsolutePath();
+
+        logger.info(String.format("Testing JVM Property %s ", sourceName));
+        System.setProperty(sourceName, dirPath);
+        assertNotNull(System.getProperty(sourceName));
+        assertNull(manifestLoader.getManifest());
+        logger.info(String.format("Cleared JVM Property %s ", sourceName));
+        System.clearProperty(sourceName);
+
+        logger.info(String.format("Testing OS Environment %s ", sourceName));
+        environmentVariables.set(sourceName, dirPath);
+        assertNotNull(System.getenv(sourceName));
+        assertNull(manifestLoader.getManifest());
+        logger.info(String.format("Cleared OS Environment %s ", sourceName));
+        environmentVariables.clear(sourceName);
+    }
+
+    @Test
     @Ignore
-    public void propertySourceHierarchyTest() {
-        //TODO Placeholder
+    public void testPropertySourceHierarchy() { //TODO
     }
 }
