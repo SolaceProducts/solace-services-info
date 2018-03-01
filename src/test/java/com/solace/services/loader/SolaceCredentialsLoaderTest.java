@@ -37,9 +37,11 @@ public class SolaceCredentialsLoaderTest {
     public static void setupTestServiceManifest() throws IOException {
         String path = resourcesDir.concat("test-service-manifest.json");
         testServiceManifest = new String(Files.readAllBytes(Paths.get(path)));
-        SolCapServicesInfo svcs = ObjectMapperUtil.getReader(SolCapServicesInfo.class).readValue(testServiceManifest);
+        SolCapServicesInfo services = ObjectMapperSingleton.getInstance()
+                .readerFor(SolCapServicesInfo.class)
+                .readValue(testServiceManifest);
 
-        for (SolaceMessagingServiceInfo smInfo : svcs.getSolaceMessagingServices())
+        for (SolaceMessagingServiceInfo smInfo : services.getSolaceMessagingServices())
             testSSIs.add(smInfo.getCredentials());
     }
 
