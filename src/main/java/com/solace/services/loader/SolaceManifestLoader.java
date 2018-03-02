@@ -12,6 +12,9 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Deals purely with manifest retrieval. No manifest marshalling or validation is done at this level.
+ */
 class SolaceManifestLoader {
     enum ManifestSource {JVM, ENV, FILE}
     enum SolaceEnv {SOLACE_CREDENTIALS, SOLCAP_SERVICES, SOLACE_SERVICES_HOME}
@@ -37,7 +40,7 @@ class SolaceManifestLoader {
 
     /**
      * Finds and loads a manifest from the application's environment as per the precedence defined in the search queries.
-     * The manifest contents are retrieved <emphasis>as is</emphasis> and is not checked for validity.
+     * The manifest contents are retrieved <b>as is</b> and is not checked for validity.
      * @return A JSON string representing a service manifest, null if not found.
      */
     public String getManifest() {
