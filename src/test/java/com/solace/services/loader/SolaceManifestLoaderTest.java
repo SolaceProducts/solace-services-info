@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import static com.solace.services.loader.SolaceManifestLoader.MANIFEST_FILE_NAME;
@@ -51,7 +51,7 @@ public class SolaceManifestLoaderTest {
     private static final String resourcesDir = "src/test/resources/";
     private static final Logger logger = LogManager.getLogger(SolaceManifestLoaderTest.class);
     private static String testServiceManifest;
-    private static List<SimpleEntry<ManifestSource, SolaceEnv>> searchesQueries;
+    private static List<Entry<ManifestSource, SolaceEnv>> searchesQueries;
 
     @Parameters(name = "{0}")
     public static Collection<Object[]> parameterData() {
@@ -61,14 +61,14 @@ public class SolaceManifestLoaderTest {
         searchesQueries.add(new SimpleEntry<>(ManifestSource.FILE, SolaceEnv.SOLACE_SERVICES_HOME));
 
         HashMap<String, Set<ManifestSource>> invertedQueries = new HashMap<>();
-        for (Map.Entry<ManifestSource, SolaceEnv> entry : searchesQueries) {
+        for (Entry<ManifestSource, SolaceEnv> entry : searchesQueries) {
             String solaceEnv = entry.getValue().name();
             if (!invertedQueries.containsKey(solaceEnv)) invertedQueries.put(solaceEnv, new HashSet<ManifestSource>());
             invertedQueries.get(solaceEnv).add(entry.getKey());
         }
 
         Set<Object[]> parameters = new HashSet<>();
-        for (Map.Entry<String, Set<ManifestSource>> entry : invertedQueries.entrySet())
+        for (Entry<String, Set<ManifestSource>> entry : invertedQueries.entrySet())
             parameters.add(new Object[]{entry.getKey(), entry.getValue()});
 
         return parameters;

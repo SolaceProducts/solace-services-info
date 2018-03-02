@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 
 /**
  * Deals purely with manifest retrieval. No manifest marshalling or validation is done at this level.
@@ -22,7 +23,7 @@ class SolaceManifestLoader {
     static final String MANIFEST_FILE_NAME = ".solaceservices";
     private static final Logger logger = LogManager.getLogger(SolaceManifestLoader.class);
 
-    private List<SimpleEntry<ManifestSource, SolaceEnv>> searchesQueries;
+    private List<Entry<ManifestSource, SolaceEnv>> searchesQueries;
 
     public SolaceManifestLoader() {
         searchesQueries = new LinkedList<>();
@@ -34,7 +35,7 @@ class SolaceManifestLoader {
     }
 
     // For Testing
-    SolaceManifestLoader(List<SimpleEntry<ManifestSource, SolaceEnv>> searchesQueries) {
+    SolaceManifestLoader(List<Entry<ManifestSource, SolaceEnv>> searchesQueries) {
         this.searchesQueries = searchesQueries;
     }
 
@@ -45,7 +46,7 @@ class SolaceManifestLoader {
      */
     public String getManifest() {
         String content = null;
-        for (SimpleEntry<ManifestSource, SolaceEnv> searchQuery : searchesQueries) {
+        for (Entry<ManifestSource, SolaceEnv> searchQuery : searchesQueries) {
             String sourceName = searchQuery.getValue().name();
             switch (searchQuery.getKey()) {
                 case JVM: content = System.getProperty(sourceName, null); break;
