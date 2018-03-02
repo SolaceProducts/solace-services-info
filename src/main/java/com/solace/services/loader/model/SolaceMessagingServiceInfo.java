@@ -13,7 +13,6 @@ public class SolaceMessagingServiceInfo {
 
     public void setCredentials(SolaceServiceCredentials credentials) {
         this.credentials = credentials;
-        if (this.name != null && !this.name.isEmpty()) this.credentials.setId(name);
     }
 
     public String getName() {
@@ -22,6 +21,5 @@ public class SolaceMessagingServiceInfo {
 
     public void setName(String name) {
         this.name = name;
-        if (this.credentials != null) this.credentials.setId(name);
     }
 }

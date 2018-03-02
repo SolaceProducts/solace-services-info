@@ -21,11 +21,31 @@ import java.util.Map;
  * <p>Reads solace credentials from one of the property sources defined in the {@link SolaceManifestLoader}.</p>
  *
  * <p>The manifest can take on one of the following forms:</p>
- * <ul>
- *     <li><i>VCAP-formatted map of services:</i> An object-type root node with key "solace-messaging".</li>
- *     <li><i>List of credentials:</i> An array-type root node.</li>
- *     <li><i>Single credential:</i> Default.</li>
- * <ul/>
+ *
+ * <table>
+ *     <tr><th>Manifest Format</th><th>Manifest Detection Handle</th><th>Default Solace-Messaging Service ID</th></tr>
+ *     <tr>
+ *         <td>CAP-Formatted Map of Services</td>
+ *         <td> An object-type root node with key "solace-messaging".</td>
+ *         <td>The meta-name of the service, otherwise an '@'-delimited concatenation of
+ *              {@link SolaceServiceCredentials#msgVpnName} and
+ *              {@link SolaceServiceCredentials#activeManagementHostname}.</td>
+ *     </tr>
+ *     <tr>
+ *         <td>List of Service Credentials</td>
+ *         <td>An array-type root node.</td>
+ *         <td>An '@'-delimited concatenation of
+ *              {@link SolaceServiceCredentials#msgVpnName} and
+ *              {@link SolaceServiceCredentials#activeManagementHostname}.</td>
+ *     </tr>
+ *     <tr>
+ *         <td>Single-Service Credentials</td>
+ *         <td>Default.</td>
+ *         <td>An '@'-delimited concatenation of
+ *              {@link SolaceServiceCredentials#msgVpnName} and
+ *              {@link SolaceServiceCredentials#activeManagementHostname}.</td>
+ *     </tr>
+ * </table>
  */
 public class SolaceCredentialsLoader {
     private SolaceManifestLoader manifestLoader = new SolaceManifestLoader();
@@ -93,20 +113,37 @@ public class SolaceCredentialsLoader {
     }
 
     private List<SolaceServiceCredentials> getServicesCredentials(String raw) throws IOException {
-        List<SolaceServiceCredentials> creds = new LinkedList<>();
+        List<SolaceServiceCredentials> svcsCreds = new LinkedList<>();
         JsonNode node = defaultReader.readTree(raw);
 
         if (node.isObject() && node.has(SOLACE_MESSAGING_SVC_NAME)) {
             SolCapServicesInfo services = servicesReader.readValue(raw);
-            for (SolaceMessagingServiceInfo serviceInfo : services.getSolaceMessagingServices())
-                creds.add(serviceInfo.getCredentials());
+            for (SolaceMessagingServiceInfo serviceInfo : services.getSolaceMessagingServices()) {
+                SolaceServiceCredentials svcCreds = serviceInfo.getCredentials();
+                svcCreds.setId(getServiceId(serviceInfo));
+                svcsCreds.add(svcCreds);
+            }
         } else if (node.isArray()) {
-            creds = credsListReader.readValue(raw);
+            svcsCreds = credsListReader.readValue(raw);
         } else {
-            SolaceServiceCredentials cred = credReader.readValue(raw);
-            creds.add(cred);
+            svcsCreds.add((SolaceServiceCredentials) credReader.readValue(raw));
         }
 
-        return creds;
+        for (SolaceServiceCredentials svcCreds : svcsCreds) svcCreds.setId(getServiceId(svcCreds));
+        return svcsCreds;
+    }
+
+    private String getServiceId(SolaceMessagingServiceInfo solaceMessagingServiceInfo) {
+        // Default: Service's meta-name
+        String id = solaceMessagingServiceInfo.getCredentials().getId();
+        return id != null && !id.isEmpty() ? id : solaceMessagingServiceInfo.getName();
+    }
+
+    private String getServiceId(SolaceServiceCredentials solaceServiceCredentials) {
+        // Default: '@'-delimited concatenation of the service's VPN name and active management host name
+        String id = solaceServiceCredentials.getId();
+        String msgVpnName = solaceServiceCredentials.getMsgVpnName();
+        String activeManagementHostname = solaceServiceCredentials.getActiveManagementHostname();
+        return id != null && !id.isEmpty() ? id : msgVpnName+'@'+activeManagementHostname;
     }
 }

@@ -1,6 +1,5 @@
 package com.solace.services.loader.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -20,7 +19,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SolaceServiceCredentials {
 
-    @JsonIgnore private String id; //TODO Do we actually need this?
+    private String id;
     private String clientUsername;
     private String clientPassword;
     private String msgVpnName;
