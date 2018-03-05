@@ -32,27 +32,27 @@ import java.util.List;
  * <p>Specific associations can be found by looking at the entries given to {@link #searchQueries}.</p>
  */
 class SolaceManifestLoader {
-    enum ManifestSource {JVM, ENV}
     enum SolaceEnv {SOLACE_CREDENTIALS, SOLCAP_SERVICES, SOLACE_SERVICES_HOME}
+    enum SolaceEnvSource {JVM, ENV}
     enum PostProcessor {NONE, FILE, REST}
 
     static final String MANIFEST_FILE_NAME = ".solaceservices";
     private static final Logger logger = LogManager.getLogger(SolaceManifestLoader.class);
 
-    private List<Triple<SolaceEnv, ManifestSource, PostProcessor>> searchQueries;
+    private List<Triple<SolaceEnv, SolaceEnvSource, PostProcessor>> searchQueries;
 
     public SolaceManifestLoader() {
         searchQueries = new LinkedList<>();
-        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLACE_CREDENTIALS, ManifestSource.JVM, PostProcessor.REST));
-        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLCAP_SERVICES, ManifestSource.JVM, PostProcessor.NONE));
-        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLACE_CREDENTIALS, ManifestSource.ENV, PostProcessor.REST));
-        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLCAP_SERVICES, ManifestSource.ENV, PostProcessor.NONE));
-        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLACE_SERVICES_HOME, ManifestSource.JVM, PostProcessor.FILE));
-        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLACE_SERVICES_HOME, ManifestSource.ENV, PostProcessor.FILE));
+        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLACE_CREDENTIALS, SolaceEnvSource.JVM, PostProcessor.REST));
+        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLCAP_SERVICES, SolaceEnvSource.JVM, PostProcessor.NONE));
+        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLACE_CREDENTIALS, SolaceEnvSource.ENV, PostProcessor.REST));
+        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLCAP_SERVICES, SolaceEnvSource.ENV, PostProcessor.NONE));
+        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLACE_SERVICES_HOME, SolaceEnvSource.JVM, PostProcessor.FILE));
+        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLACE_SERVICES_HOME, SolaceEnvSource.ENV, PostProcessor.FILE));
     }
 
     // For Testing
-    SolaceManifestLoader(List<Triple<SolaceEnv, ManifestSource, PostProcessor>> searchQueries) {
+    SolaceManifestLoader(List<Triple<SolaceEnv, SolaceEnvSource, PostProcessor>> searchQueries) {
         this.searchQueries = searchQueries;
     }
 
@@ -63,7 +63,7 @@ class SolaceManifestLoader {
      */
     public String getManifest() {
         String content = null;
-        for (Triple<SolaceEnv, ManifestSource, PostProcessor> searchQuery : searchQueries) {
+        for (Triple<SolaceEnv, SolaceEnvSource, PostProcessor> searchQuery : searchQueries) {
             String sourceName = searchQuery.getLeft().name();
             switch (searchQuery.getMiddle()) {
                 case JVM: content = System.getProperty(sourceName, null); break;
@@ -114,7 +114,7 @@ class SolaceManifestLoader {
     }
 
     // For Testing
-    void setSearchQueries(List<Triple<SolaceEnv, ManifestSource, PostProcessor>> searchQueries) {
+    void setSearchQueries(List<Triple<SolaceEnv, SolaceEnvSource, PostProcessor>> searchQueries) {
         this.searchQueries = searchQueries;
     }
 }

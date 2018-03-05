@@ -30,7 +30,7 @@ import java.util.Set;
 
 import static com.solace.services.loader.SolaceManifestLoader.MANIFEST_FILE_NAME;
 import static com.solace.services.loader.SolaceManifestLoader.SolaceEnv;
-import static com.solace.services.loader.SolaceManifestLoader.ManifestSource;
+import static com.solace.services.loader.SolaceManifestLoader.SolaceEnvSource;
 import static com.solace.services.loader.SolaceManifestLoader.PostProcessor;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -48,37 +48,37 @@ public class SolaceManifestLoaderTest {
     @Rule public TemporaryFolder tmpFolder = new TemporaryFolder();
 
     @Parameter(0) public String sourceName;
-    @Parameter(1) public Set<Entry<ManifestSource, PostProcessor>> srcProperties;
+    @Parameter(1) public Set<Entry<SolaceEnvSource, PostProcessor>> srcProperties;
 
     private SolaceManifestLoader manifestLoader;
 
     private static final String resourcesDir = "src/test/resources/";
     private static final Logger logger = LogManager.getLogger(SolaceManifestLoaderTest.class);
     private static String testManifest;
-    private static List<Triple<SolaceEnv, ManifestSource, PostProcessor>> searchQueries;
+    private static List<Triple<SolaceEnv, SolaceEnvSource, PostProcessor>> searchQueries;
 
     @Parameters(name = "{0}")
     public static Collection<Object[]> parameterData() {
         searchQueries = new LinkedList<>();
-//        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLACE_CREDENTIALS, ManifestSource.JVM, PostProcessor.REST));
-        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLCAP_SERVICES, ManifestSource.JVM, PostProcessor.NONE));
-//        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLACE_CREDENTIALS, ManifestSource.ENV, PostProcessor.REST));
-        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLCAP_SERVICES, ManifestSource.ENV, PostProcessor.NONE));
-        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLACE_SERVICES_HOME, ManifestSource.JVM, PostProcessor.FILE));
-        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLACE_SERVICES_HOME, ManifestSource.ENV, PostProcessor.FILE));
+//        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLACE_CREDENTIALS, SolaceEnvSource.JVM, PostProcessor.REST));
+        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLCAP_SERVICES, SolaceEnvSource.JVM, PostProcessor.NONE));
+//        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLACE_CREDENTIALS, SolaceEnvSource.ENV, PostProcessor.REST));
+        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLCAP_SERVICES, SolaceEnvSource.ENV, PostProcessor.NONE));
+        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLACE_SERVICES_HOME, SolaceEnvSource.JVM, PostProcessor.FILE));
+        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLACE_SERVICES_HOME, SolaceEnvSource.ENV, PostProcessor.FILE));
 
         // -- Collect Properties Per Source Name --
-        HashMap<String, Set<Entry<ManifestSource, PostProcessor>>> invertedQueries = new HashMap<>();
-        for (Triple<SolaceEnv, ManifestSource, PostProcessor> entry : searchQueries) {
+        HashMap<String, Set<Entry<SolaceEnvSource, PostProcessor>>> invertedQueries = new HashMap<>();
+        for (Triple<SolaceEnv, SolaceEnvSource, PostProcessor> entry : searchQueries) {
             String solaceEnv = entry.getLeft().name();
             if (!invertedQueries.containsKey(solaceEnv))
-                invertedQueries.put(solaceEnv, new HashSet<Entry<ManifestSource, PostProcessor>>());
+                invertedQueries.put(solaceEnv, new HashSet<Entry<SolaceEnvSource, PostProcessor>>());
             invertedQueries.get(solaceEnv).add(new SimpleEntry<>(entry.getMiddle(), entry.getRight()));
         }
 
         // -- Setup JUnit Parameters --
         Set<Object[]> parameters = new HashSet<>();
-        for (Entry<String, Set<Entry<ManifestSource, PostProcessor>>> entry : invertedQueries.entrySet())
+        for (Entry<String, Set<Entry<SolaceEnvSource, PostProcessor>>> entry : invertedQueries.entrySet())
             parameters.add(new Object[]{entry.getKey(), entry.getValue()});
 
         return parameters;
@@ -111,7 +111,7 @@ public class SolaceManifestLoaderTest {
 
     @Test
     public void testJvm() {
-        Entry<ManifestSource, PostProcessor> validTestProps = new SimpleEntry<>(ManifestSource.JVM, PostProcessor.NONE);
+        Entry<SolaceEnvSource, PostProcessor> validTestProps = new SimpleEntry<>(SolaceEnvSource.JVM, PostProcessor.NONE);
         assumeTrue("Not a JVM query", srcProperties.contains(validTestProps));
 
         logger.info(String.format("Testing JVM Property %s ", sourceName));
@@ -123,7 +123,7 @@ public class SolaceManifestLoaderTest {
 
     @Test
     public void testEnv() {
-        Entry<ManifestSource, PostProcessor> validTestProps = new SimpleEntry<>(ManifestSource.ENV, PostProcessor.NONE);
+        Entry<SolaceEnvSource, PostProcessor> validTestProps = new SimpleEntry<>(SolaceEnvSource.ENV, PostProcessor.NONE);
         assumeTrue("Not an ENV query", srcProperties.contains(validTestProps));
         logger.info(String.format("Testing OS Environment %s ", sourceName));
 
@@ -135,8 +135,8 @@ public class SolaceManifestLoaderTest {
     @Test
     public void testUserHomeFallback() throws IOException {
         assumeTrue("Not a FILE query", srcProperties.containsAll(Arrays.asList(
-                new SimpleEntry<>(ManifestSource.JVM, PostProcessor.FILE),
-                new SimpleEntry<>(ManifestSource.ENV, PostProcessor.FILE))));
+                new SimpleEntry<>(SolaceEnvSource.JVM, PostProcessor.FILE),
+                new SimpleEntry<>(SolaceEnvSource.ENV, PostProcessor.FILE))));
 
         logger.info(String.format("Testing user home fallback for %s", sourceName));
         System.setProperty("user.home", tmpFolder.getRoot().getAbsolutePath());
@@ -156,7 +156,7 @@ public class SolaceManifestLoaderTest {
 
     @Test
     public void testJvmFile() throws IOException {
-        Entry<ManifestSource, PostProcessor> validTestProps = new SimpleEntry<>(ManifestSource.JVM, PostProcessor.FILE);
+        Entry<SolaceEnvSource, PostProcessor> validTestProps = new SimpleEntry<>(SolaceEnvSource.JVM, PostProcessor.FILE);
         assumeTrue("Not a JVM-FILE query", srcProperties.contains(validTestProps));
 
         logger.info(String.format("Testing JVM Property %s ", sourceName));
@@ -178,7 +178,7 @@ public class SolaceManifestLoaderTest {
 
     @Test
     public void testEnvFile() throws IOException {
-        Entry<ManifestSource, PostProcessor> validTestProps = new SimpleEntry<>(ManifestSource.ENV, PostProcessor.FILE);
+        Entry<SolaceEnvSource, PostProcessor> validTestProps = new SimpleEntry<>(SolaceEnvSource.ENV, PostProcessor.FILE);
         assumeTrue("Not an ENV-FILE query", srcProperties.contains(validTestProps));
 
         logger.info(String.format("Testing OS Environment %s ", sourceName));
@@ -201,7 +201,7 @@ public class SolaceManifestLoaderTest {
 
     @Test
     public void testJvmFileNotExist() {
-        Entry<ManifestSource, PostProcessor> validTestProps = new SimpleEntry<>(ManifestSource.JVM, PostProcessor.FILE);
+        Entry<SolaceEnvSource, PostProcessor> validTestProps = new SimpleEntry<>(SolaceEnvSource.JVM, PostProcessor.FILE);
         assumeTrue("Not a JVM-FILE query", srcProperties.contains(validTestProps));
 
         logger.info(String.format("Testing JVM Property %s ", sourceName));
@@ -212,7 +212,7 @@ public class SolaceManifestLoaderTest {
 
     @Test
     public void testEnvFileNotExist() {
-        Entry<ManifestSource, PostProcessor> validTestProps = new SimpleEntry<>(ManifestSource.ENV, PostProcessor.FILE);
+        Entry<SolaceEnvSource, PostProcessor> validTestProps = new SimpleEntry<>(SolaceEnvSource.ENV, PostProcessor.FILE);
         assumeTrue("Not an ENV-FILE query", srcProperties.contains(validTestProps));
 
         logger.info(String.format("Testing OS Environment %s ", sourceName));
@@ -223,8 +223,8 @@ public class SolaceManifestLoaderTest {
 
     @Test
     public void testPropertySourceHierarchy() throws IOException {
-        for (Entry<ManifestSource, PostProcessor> props : srcProperties) {
-            Triple<SolaceEnv, ManifestSource, PostProcessor> query =
+        for (Entry<SolaceEnvSource, PostProcessor> props : srcProperties) {
+            Triple<SolaceEnv, SolaceEnvSource, PostProcessor> query =
                     new ImmutableTriple<>(SolaceEnv.valueOf(sourceName), props.getKey(), props.getValue());
 
             logger.info(String.format("Testing hierarchy of %s", query));
@@ -242,12 +242,12 @@ public class SolaceManifestLoaderTest {
                 case ENV: environmentVariables.set(sourceName, valToWrite); break;
             }
 
-            List<Triple<SolaceEnv, ManifestSource, PostProcessor>> testQueries = new LinkedList<>(searchQueries);
+            List<Triple<SolaceEnv, SolaceEnvSource, PostProcessor>> testQueries = new LinkedList<>(searchQueries);
             boolean testedQuery = false;
 
             while (!testQueries.isEmpty()) {
                 manifestLoader.setSearchQueries(testQueries);
-                Triple<SolaceEnv, ManifestSource, PostProcessor> firstQuery = testQueries.get(0);
+                Triple<SolaceEnv, SolaceEnvSource, PostProcessor> firstQuery = testQueries.get(0);
                 logger.info(String.format("Top of loader's search stack: %s", firstQuery));
 
                 String output = manifestLoader.getManifest();
