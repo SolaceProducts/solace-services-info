@@ -22,7 +22,7 @@ import java.util.Map;
  *
  * <p>The manifest can take on one of the following forms:</p>
  *
- * <table>
+ * <table summary="Valid manifest structures along with ID generation logic for each format.">
  *     <tr><th>Manifest Format</th><th>Manifest Detection Handle</th><th>Default Solace-Messaging Service ID</th></tr>
  *     <tr>
  *         <td>VCAP-Formatted Map of Services</td>
