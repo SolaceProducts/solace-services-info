@@ -18,14 +18,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p>Reads solace credentials from one of the property sources defined in the {@link SolaceManifestLoader}.</p>
+ * <p>Reads Solace service credentials from one of the property sources defined in {@link SolaceManifestLoader}.</p>
  *
  * <p>The manifest can take on one of the following forms:</p>
  *
  * <table>
  *     <tr><th>Manifest Format</th><th>Manifest Detection Handle</th><th>Default Solace-Messaging Service ID</th></tr>
  *     <tr>
- *         <td>CAP-Formatted Map of Services</td>
+ *         <td>VCAP-Formatted Map of Services</td>
  *         <td> An object-type root node with key "solace-messaging".</td>
  *         <td>The meta-name of the service, otherwise an '@'-delimited concatenation of
  *              {@link SolaceServiceCredentials#msgVpnName} and

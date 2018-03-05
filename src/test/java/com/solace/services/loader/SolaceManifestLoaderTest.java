@@ -1,10 +1,11 @@
 package com.solace.services.loader;
 
+import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,10 +31,12 @@ import java.util.Set;
 import static com.solace.services.loader.SolaceManifestLoader.MANIFEST_FILE_NAME;
 import static com.solace.services.loader.SolaceManifestLoader.SolaceEnv;
 import static com.solace.services.loader.SolaceManifestLoader.ManifestSource;
+import static com.solace.services.loader.SolaceManifestLoader.PostProcessor;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 import static org.junit.runners.Parameterized.Parameter;
 import static org.junit.runners.Parameterized.Parameters;
@@ -44,31 +48,37 @@ public class SolaceManifestLoaderTest {
     @Rule public TemporaryFolder tmpFolder = new TemporaryFolder();
 
     @Parameter(0) public String sourceName;
-    @Parameter(1) public Set<ManifestSource> manifestSource;
+    @Parameter(1) public Set<Entry<ManifestSource, PostProcessor>> srcProperties;
 
     private SolaceManifestLoader manifestLoader;
 
     private static final String resourcesDir = "src/test/resources/";
     private static final Logger logger = LogManager.getLogger(SolaceManifestLoaderTest.class);
-    private static String testServiceManifest;
-    private static List<Entry<ManifestSource, SolaceEnv>> searchesQueries;
+    private static String testManifest;
+    private static List<Triple<SolaceEnv, ManifestSource, PostProcessor>> searchQueries;
 
     @Parameters(name = "{0}")
     public static Collection<Object[]> parameterData() {
-        searchesQueries = new LinkedList<>();
-        searchesQueries.add(new SimpleEntry<>(ManifestSource.JVM, SolaceEnv.SOLCAP_SERVICES));
-        searchesQueries.add(new SimpleEntry<>(ManifestSource.ENV, SolaceEnv.SOLCAP_SERVICES));
-        searchesQueries.add(new SimpleEntry<>(ManifestSource.FILE, SolaceEnv.SOLACE_SERVICES_HOME));
+        searchQueries = new LinkedList<>();
+//        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLACE_CREDENTIALS, ManifestSource.JVM, PostProcessor.REST));
+        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLCAP_SERVICES, ManifestSource.JVM, PostProcessor.NONE));
+//        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLACE_CREDENTIALS, ManifestSource.ENV, PostProcessor.REST));
+        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLCAP_SERVICES, ManifestSource.ENV, PostProcessor.NONE));
+        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLACE_SERVICES_HOME, ManifestSource.JVM, PostProcessor.FILE));
+        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLACE_SERVICES_HOME, ManifestSource.ENV, PostProcessor.FILE));
 
-        HashMap<String, Set<ManifestSource>> invertedQueries = new HashMap<>();
-        for (Entry<ManifestSource, SolaceEnv> entry : searchesQueries) {
-            String solaceEnv = entry.getValue().name();
-            if (!invertedQueries.containsKey(solaceEnv)) invertedQueries.put(solaceEnv, new HashSet<ManifestSource>());
-            invertedQueries.get(solaceEnv).add(entry.getKey());
+        // -- Collect Properties Per Source Name --
+        HashMap<String, Set<Entry<ManifestSource, PostProcessor>>> invertedQueries = new HashMap<>();
+        for (Triple<SolaceEnv, ManifestSource, PostProcessor> entry : searchQueries) {
+            String solaceEnv = entry.getLeft().name();
+            if (!invertedQueries.containsKey(solaceEnv))
+                invertedQueries.put(solaceEnv, new HashSet<Entry<ManifestSource, PostProcessor>>());
+            invertedQueries.get(solaceEnv).add(new SimpleEntry<>(entry.getMiddle(), entry.getRight()));
         }
 
+        // -- Setup JUnit Parameters --
         Set<Object[]> parameters = new HashSet<>();
-        for (Entry<String, Set<ManifestSource>> entry : invertedQueries.entrySet())
+        for (Entry<String, Set<Entry<ManifestSource, PostProcessor>>> entry : invertedQueries.entrySet())
             parameters.add(new Object[]{entry.getKey(), entry.getValue()});
 
         return parameters;
@@ -78,15 +88,16 @@ public class SolaceManifestLoaderTest {
     public static void setupTestServiceManifest() throws IOException {
         String credentialsPath = resourcesDir.concat("test-service-credentials.json.template");
         String servicesPath = resourcesDir.concat("test-services-manifest.json.template");
-        testServiceManifest = String.format(
+        testManifest = String.format(
                 new String(Files.readAllBytes(Paths.get(servicesPath))),
                 new String(Files.readAllBytes(Paths.get(credentialsPath))));
     }
 
     @Before
     public void setup() {
-        manifestLoader = new SolaceManifestLoader(searchesQueries);
+        manifestLoader = new SolaceManifestLoader(searchQueries);
 
+        // Ensures that any REAL property/environment variables are cleared before executing the test
         for (SolaceEnv env : SolaceEnv.values()) {
             System.clearProperty(env.name());
             environmentVariables.clear(env.name());
@@ -99,91 +110,184 @@ public class SolaceManifestLoaderTest {
     }
 
     @Test
-    public void testJvmSolo() {
-        assumeTrue("Not a JVM query", manifestSource.contains(ManifestSource.JVM));
+    public void testJvm() {
+        Entry<ManifestSource, PostProcessor> validTestProps = new SimpleEntry<>(ManifestSource.JVM, PostProcessor.NONE);
+        assumeTrue("Not a JVM query", srcProperties.contains(validTestProps));
+
         logger.info(String.format("Testing JVM Property %s ", sourceName));
 
-        System.setProperty(sourceName, testServiceManifest);
+        System.setProperty(sourceName, testManifest);
         assertNotNull(System.getProperty(sourceName));
-        assertEquals(manifestLoader.getManifest(), testServiceManifest);
+        assertEquals(manifestLoader.getManifest(), testManifest);
     }
 
     @Test
-    public void testEnvSolo() {
-        assumeTrue("Not an ENV query", manifestSource.contains(ManifestSource.ENV));
+    public void testEnv() {
+        Entry<ManifestSource, PostProcessor> validTestProps = new SimpleEntry<>(ManifestSource.ENV, PostProcessor.NONE);
+        assumeTrue("Not an ENV query", srcProperties.contains(validTestProps));
         logger.info(String.format("Testing OS Environment %s ", sourceName));
 
-        environmentVariables.set(sourceName, testServiceManifest);
+        environmentVariables.set(sourceName, testManifest);
         assertNotNull(System.getenv(sourceName));
-        assertEquals(manifestLoader.getManifest(), testServiceManifest);
+        assertEquals(manifestLoader.getManifest(), testManifest);
     }
 
     @Test
-    public void testFileSolo() throws IOException {
-        assumeTrue("Not a FILE query", manifestSource.contains(ManifestSource.FILE));
-        String dirPath = tmpFolder.getRoot().getAbsolutePath();
+    public void testUserHomeFallback() throws IOException {
+        assumeTrue("Not a FILE query", srcProperties.containsAll(Arrays.asList(
+                new SimpleEntry<>(ManifestSource.JVM, PostProcessor.FILE),
+                new SimpleEntry<>(ManifestSource.ENV, PostProcessor.FILE))));
 
-        File manifestFile = tmpFolder.newFile(MANIFEST_FILE_NAME);
-        Files.write(manifestFile.toPath(), testServiceManifest.getBytes());
+        logger.info(String.format("Testing user home fallback for %s", sourceName));
+        System.setProperty("user.home", tmpFolder.getRoot().getAbsolutePath());
+        generateTestFile(MANIFEST_FILE_NAME, testManifest);
 
-        logger.info(String.format("Testing JVM Property %s ", sourceName));
-        System.setProperty(sourceName, dirPath);
-        assertNotNull(System.getProperty(sourceName));
-        assertEquals(manifestLoader.getManifest(), testServiceManifest);
-        logger.info(String.format("Cleared JVM Property %s ", sourceName));
-        System.clearProperty(sourceName);
-
-        logger.info(String.format("Testing OS Environment %s ", sourceName));
-        environmentVariables.set(sourceName, dirPath);
-        assertNotNull(System.getenv(sourceName));
-        assertEquals(manifestLoader.getManifest(), testServiceManifest);
-        logger.info(String.format("Cleared OS Environment %s ", sourceName));
-        environmentVariables.clear(sourceName);
+        assertEquals(manifestLoader.getManifest(), testManifest);
 
         String manifestMod = "abc";
         logger.info(String.format("Appending %s to the manifest.", manifestMod));
-        String newTestManifest = testServiceManifest.concat(manifestMod);
-        assertNotEquals("TEST ERROR: The manifest string wasn't modified...",
-                newTestManifest, testServiceManifest);
-        Files.write(manifestFile.toPath(), newTestManifest.getBytes());
+        String newTestManifest = testManifest.concat(manifestMod);
+        assertNotEquals("TEST ERROR: The manifest string wasn't modified...", newTestManifest, testManifest);
+        generateTestFile(MANIFEST_FILE_NAME, newTestManifest);
 
-        logger.info(String.format("Testing JVM Property %s with modified manifest", sourceName));
-        System.setProperty(sourceName, dirPath);
-        assertNotNull(System.getProperty(sourceName));
+        logger.info(String.format("Testing user home fallback for %s with modified manifest", sourceName));
         assertEquals(manifestLoader.getManifest(), newTestManifest);
-        logger.info(String.format("Cleared JVM Property %s ", sourceName));
-        System.clearProperty(sourceName);
-
-        logger.info(String.format("Testing OS Environment %s with modified manifest", sourceName));
-        environmentVariables.set(sourceName, dirPath);
-        assertNotNull(System.getenv(sourceName));
-        assertEquals(manifestLoader.getManifest(), newTestManifest);
-        logger.info(String.format("Cleared OS Environment %s ", sourceName));
-        environmentVariables.clear(sourceName);
     }
 
     @Test
-    public void testFileNotExist() {
-        assumeTrue("Not a FILE query", manifestSource.contains(ManifestSource.FILE));
-        String dirPath = tmpFolder.getRoot().getAbsolutePath();
+    public void testJvmFile() throws IOException {
+        Entry<ManifestSource, PostProcessor> validTestProps = new SimpleEntry<>(ManifestSource.JVM, PostProcessor.FILE);
+        assumeTrue("Not a JVM-FILE query", srcProperties.contains(validTestProps));
 
         logger.info(String.format("Testing JVM Property %s ", sourceName));
-        System.setProperty(sourceName, dirPath);
-        assertNotNull(System.getProperty(sourceName));
-        assertNull(manifestLoader.getManifest());
-        logger.info(String.format("Cleared JVM Property %s ", sourceName));
-        System.clearProperty(sourceName);
+        System.setProperty(sourceName, generateTestFile(MANIFEST_FILE_NAME, testManifest));
 
-        logger.info(String.format("Testing OS Environment %s ", sourceName));
-        environmentVariables.set(sourceName, dirPath);
-        assertNotNull(System.getenv(sourceName));
-        assertNull(manifestLoader.getManifest());
-        logger.info(String.format("Cleared OS Environment %s ", sourceName));
-        environmentVariables.clear(sourceName);
+        assertNotNull(System.getProperty(sourceName));
+        assertEquals(manifestLoader.getManifest(), testManifest);
+
+        String manifestMod = "abc";
+        logger.info(String.format("Appending %s to the manifest.", manifestMod));
+        String newTestManifest = testManifest.concat(manifestMod);
+        assertNotEquals("TEST ERROR: The manifest string wasn't modified...", newTestManifest, testManifest);
+        generateTestFile(MANIFEST_FILE_NAME, newTestManifest);
+
+        logger.info(String.format("Testing JVM Property %s with modified manifest", sourceName));
+        assertNotNull(System.getProperty(sourceName));
+        assertEquals(manifestLoader.getManifest(), newTestManifest);
     }
 
     @Test
-    @Ignore
-    public void testPropertySourceHierarchy() { //TODO
+    public void testEnvFile() throws IOException {
+        Entry<ManifestSource, PostProcessor> validTestProps = new SimpleEntry<>(ManifestSource.ENV, PostProcessor.FILE);
+        assumeTrue("Not an ENV-FILE query", srcProperties.contains(validTestProps));
+
+        logger.info(String.format("Testing OS Environment %s ", sourceName));
+        environmentVariables.set(sourceName, generateTestFile(MANIFEST_FILE_NAME, testManifest));
+
+        assertNotNull(System.getenv(sourceName));
+        assertEquals(manifestLoader.getManifest(), testManifest);
+
+        String manifestMod = "abc";
+        logger.info(String.format("Appending %s to the manifest.", manifestMod));
+        String newTestManifest = testManifest.concat(manifestMod);
+        assertNotEquals("TEST ERROR: The manifest string wasn't modified...",
+                newTestManifest, testManifest);
+        generateTestFile(MANIFEST_FILE_NAME, newTestManifest);
+
+        logger.info(String.format("Testing OS Environment %s with modified manifest", sourceName));
+        assertNotNull(System.getenv(sourceName));
+        assertEquals(manifestLoader.getManifest(), newTestManifest);
+    }
+
+    @Test
+    public void testJvmFileNotExist() {
+        Entry<ManifestSource, PostProcessor> validTestProps = new SimpleEntry<>(ManifestSource.JVM, PostProcessor.FILE);
+        assumeTrue("Not a JVM-FILE query", srcProperties.contains(validTestProps));
+
+        logger.info(String.format("Testing JVM Property %s ", sourceName));
+        System.setProperty(sourceName, tmpFolder.getRoot().getAbsolutePath());
+        assertNotNull(System.getProperty(sourceName));
+        assertNull(manifestLoader.getManifest());
+    }
+
+    @Test
+    public void testEnvFileNotExist() {
+        Entry<ManifestSource, PostProcessor> validTestProps = new SimpleEntry<>(ManifestSource.ENV, PostProcessor.FILE);
+        assumeTrue("Not an ENV-FILE query", srcProperties.contains(validTestProps));
+
+        logger.info(String.format("Testing OS Environment %s ", sourceName));
+        environmentVariables.set(sourceName, tmpFolder.getRoot().getAbsolutePath());
+        assertNotNull(System.getenv(sourceName));
+        assertNull(manifestLoader.getManifest());
+    }
+
+    @Test
+    public void testPropertySourceHierarchy() throws IOException {
+        for (Entry<ManifestSource, PostProcessor> props : srcProperties) {
+            Triple<SolaceEnv, ManifestSource, PostProcessor> query =
+                    new ImmutableTriple<>(SolaceEnv.valueOf(sourceName), props.getKey(), props.getValue());
+
+            logger.info(String.format("Testing hierarchy of %s", query));
+
+            String fakeVal = setupFakeJVMPropsAndOSEnvs();
+            String valToWrite = testManifest;
+
+            switch (props.getValue()) {
+                case FILE: valToWrite = generateTestFile(MANIFEST_FILE_NAME, testManifest); break;
+                case REST: break; //TODO
+            }
+
+            switch (props.getKey()) {
+                case JVM: System.setProperty(sourceName, valToWrite); break;
+                case ENV: environmentVariables.set(sourceName, valToWrite); break;
+            }
+
+            List<Triple<SolaceEnv, ManifestSource, PostProcessor>> testQueries = new LinkedList<>(searchQueries);
+            boolean testedQuery = false;
+
+            while (!testQueries.isEmpty()) {
+                manifestLoader.setSearchQueries(testQueries);
+                Triple<SolaceEnv, ManifestSource, PostProcessor> firstQuery = testQueries.get(0);
+                logger.info(String.format("Top of loader's search stack: %s", firstQuery));
+
+                String output = manifestLoader.getManifest();
+                if (firstQuery.equals(query)) {
+                    assertNotNull(output);
+                    assertEquals(testManifest, output);
+                    testedQuery = true;
+                } else if (!firstQuery.getRight().equals(PostProcessor.NONE)) {
+                    // Capture post-processor failure scenarios since they would safely fall through to the next query
+                    if (testedQuery) assertTrue("A non-null and non-fake value was returned",
+                            output == null || output.equals(fakeVal));
+                    else assertTrue("A value that is neither the test manifest nor the fake value was returned",
+                            output.equals(testManifest) || output.equals(fakeVal));
+                } else {
+                    assertNotNull(output);
+                    assertEquals("A non-fake value was returned", fakeVal, output);
+                }
+                testQueries.remove(0);
+            }
+        }
+    }
+
+    private String generateTestFile(String name, String contents) throws IOException {
+        String dirPath = tmpFolder.getRoot().getAbsolutePath();
+        String filePath = dirPath.concat(File.separator).concat(name);
+        File manifestFile = Files.exists(Paths.get(filePath)) ? new File(filePath) : tmpFolder.newFile(name);
+        Files.write(manifestFile.toPath(), contents.getBytes());
+        return dirPath;
+    }
+
+    private String setupFakeJVMPropsAndOSEnvs() {
+        // No guarantee that any of the set props and env variables will have valid values
+        // No guarantee that all of the set props and env variables will be valid queries
+        logger.info("Will setup fake JVM properties and OS environments:");
+        String test = "TESTING_1_2_3!";
+        for (SolaceEnv solaceEnv : SolaceEnv.values()) {
+            logger.info(String.format("\t%s: \"%s\"", solaceEnv.name(), test));
+            System.setProperty(solaceEnv.name(), test);
+            environmentVariables.set(solaceEnv.name(), test);
+        }
+        return test;
     }
 }

@@ -97,6 +97,13 @@ public class SolaceCredentialsLoaderTest {
     }
 
     @Test
+    public void testEmptyManifest() {
+        Mockito.when(manifestLoader.getManifest()).thenReturn("");
+        assertTrue(sscLoader.getAllSolaceServiceInfo().isEmpty());
+        assertNull(sscLoader.getSolaceServiceInfo());
+    }
+
+    @Test
     public void testGetAllSolaceServiceInfo() {
         assertEquals(new HashSet<>(testSSCs), new HashSet<>(sscLoader.getAllSolaceServiceInfo().values()));
     }
