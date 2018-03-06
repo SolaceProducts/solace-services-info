@@ -1,10 +1,10 @@
 package com.solace.services.loader;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.solace.services.loader.model.SolCapServicesInfo;
 import com.solace.services.loader.model.SolaceMessagingServiceInfo;
 import com.solace.services.loader.model.SolaceServiceCredentials;
+import com.solace.services.loader.model.SolaceServiceCredentialsImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Before;
@@ -42,7 +42,6 @@ public class SolaceCredentialsLoaderTest {
     @Parameter(0) public String testManifestFormatAlias;
     @Parameter(1) public String testManifest;
     @Parameter(2) public List<SolaceServiceCredentials> testSSCs;
-    @Parameter(3) public TypeReference<?> testManifestClass;
     @Mock private SolaceManifestLoader manifestLoader;
     @InjectMocks private SolaceCredentialsLoader sscLoader;
 
@@ -57,29 +56,25 @@ public class SolaceCredentialsLoaderTest {
 
         // -- Setup Test Objects --
         SolCapServicesInfo services = objectMapper.readerFor(SolCapServicesInfo.class).readValue(testCAP);
-        SolaceServiceCredentials oneCreds = objectMapper.readerFor(SolaceServiceCredentials.class).readValue(testCreds);
-        List<SolaceServiceCredentials> credsList = new LinkedList<>();
+        SolaceServiceCredentialsImpl oneCreds = objectMapper.readerFor(SolaceServiceCredentialsImpl.class).readValue(testCreds);
+        List<SolaceServiceCredentialsImpl> credsList = new LinkedList<>();
         credsList.add(oneCreds);
 
         List<SolaceServiceCredentials> testCAPCreds = new ArrayList<>();
         for (SolaceMessagingServiceInfo smInfo : services.getSolaceMessagingServices()) {
-            SolaceServiceCredentials sCreds = smInfo.getCredentials();
+            SolaceServiceCredentialsImpl sCreds = smInfo.getCredentials();
             sCreds.setId(smInfo.getName());
             testCAPCreds.add(sCreds);
         }
 
-        for (SolaceServiceCredentials creds : credsList)
+        for (SolaceServiceCredentialsImpl creds : credsList)
             creds.setId(creds.getMsgVpnName() + '@' + creds.getActiveManagementHostname());
 
         // -- Setup JUnit Parameters --
-        TypeReference<SolCapServicesInfo> solcapType = new TypeReference<SolCapServicesInfo>() {};
-        TypeReference<List<SolaceCredentialsLoader>> sscsType = new TypeReference<List<SolaceCredentialsLoader>>() {};
-        TypeReference<SolaceServiceCredentials> sscType = new TypeReference<SolaceServiceCredentials>() {};
-
         Set<Object[]> parameters = new HashSet<>();
-        parameters.add(new Object[] {"CAP-Manifest", testCAP, testCAPCreds, solcapType});
-        parameters.add(new Object[] {"Multi-Service Credentials List", testCredsList, credsList, sscsType});
-        parameters.add(new Object[] {"Single-Service Credentials", testCreds, credsList, sscType});
+        parameters.add(new Object[] {"CAP-Manifest", testCAP, testCAPCreds});
+        parameters.add(new Object[] {"Multi-Service Credentials List", testCredsList, credsList});
+        parameters.add(new Object[] {"Single-Service Credentials", testCreds, credsList});
         return parameters;
     }
 

@@ -4,14 +4,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SolaceMessagingServiceInfo {
-    private SolaceServiceCredentials credentials;
+    private SolaceServiceCredentialsImpl credentials;
     private String name;
 
-    public SolaceServiceCredentials getCredentials() {
+    public SolaceServiceCredentialsImpl getCredentials() {
         return credentials;
     }
 
-    public void setCredentials(SolaceServiceCredentials credentials) {
+    public void setCredentials(SolaceServiceCredentialsImpl credentials) {
         this.credentials = credentials;
     }
 

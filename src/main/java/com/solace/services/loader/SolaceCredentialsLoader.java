@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.solace.services.loader.model.SolCapServicesInfo;
 import com.solace.services.loader.model.SolaceMessagingServiceInfo;
 import com.solace.services.loader.model.SolaceServiceCredentials;
+import com.solace.services.loader.model.SolaceServiceCredentialsImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -28,22 +29,22 @@ import java.util.Map;
  *         <td>VCAP-Formatted Map of Services</td>
  *         <td> An object-type root node with key "solace-messaging".</td>
  *         <td>The meta-name of the service, otherwise an '@'-delimited concatenation of
- *              {@link SolaceServiceCredentials#msgVpnName} and
- *              {@link SolaceServiceCredentials#activeManagementHostname}.</td>
+ *              the {@link SolaceServiceCredentials#getMsgVpnName() VPN name} and
+ *              the {@link SolaceServiceCredentials#getActiveManagementHostname() active management hostname}.</td>
  *     </tr>
  *     <tr>
  *         <td>List of Service Credentials</td>
  *         <td>An array-type root node.</td>
  *         <td>An '@'-delimited concatenation of
- *              {@link SolaceServiceCredentials#msgVpnName} and
- *              {@link SolaceServiceCredentials#activeManagementHostname}.</td>
+ *              the {@link SolaceServiceCredentials#getMsgVpnName() VPN name} and
+ *              the {@link SolaceServiceCredentials#getActiveManagementHostname() active management hostname}.</td>
  *     </tr>
  *     <tr>
  *         <td>Single-Service Credentials</td>
  *         <td>Default.</td>
  *         <td>An '@'-delimited concatenation of
- *              {@link SolaceServiceCredentials#msgVpnName} and
- *              {@link SolaceServiceCredentials#activeManagementHostname}.</td>
+ *              the {@link SolaceServiceCredentials#getMsgVpnName() VPN name} and
+ *              the {@link SolaceServiceCredentials#getActiveManagementHostname() active management hostname}.</td>
  *     </tr>
  * </table>
  */
@@ -61,8 +62,8 @@ public class SolaceCredentialsLoader {
         ObjectMapper objectMapper = ObjectMapperSingleton.getInstance();
         defaultReader = objectMapper.reader();
         servicesReader = objectMapper.readerFor(SolCapServicesInfo.class);
-        credsListReader = objectMapper.readerFor(new TypeReference<List<SolaceServiceCredentials>>(){});
-        credReader = objectMapper.readerFor(SolaceServiceCredentials.class);
+        credsListReader = objectMapper.readerFor(new TypeReference<List<SolaceServiceCredentialsImpl>>(){});
+        credReader = objectMapper.readerFor(SolaceServiceCredentialsImpl.class);
     }
 
     /**
@@ -113,24 +114,24 @@ public class SolaceCredentialsLoader {
     }
 
     private List<SolaceServiceCredentials> getServicesCredentials(String raw) throws IOException {
-        List<SolaceServiceCredentials> svcsCreds = new LinkedList<>();
+        List<SolaceServiceCredentialsImpl> svcsCreds = new LinkedList<>();
         JsonNode node = defaultReader.readTree(raw);
 
         if (node.isObject() && node.has(SOLACE_MESSAGING_SVC_NAME)) {
             SolCapServicesInfo services = servicesReader.readValue(raw);
             for (SolaceMessagingServiceInfo serviceInfo : services.getSolaceMessagingServices()) {
-                SolaceServiceCredentials svcCreds = serviceInfo.getCredentials();
+                SolaceServiceCredentialsImpl svcCreds = serviceInfo.getCredentials();
                 svcCreds.setId(getServiceId(serviceInfo));
                 svcsCreds.add(svcCreds);
             }
         } else if (node.isArray()) {
             svcsCreds = credsListReader.readValue(raw);
         } else {
-            svcsCreds.add((SolaceServiceCredentials) credReader.readValue(raw));
+            svcsCreds.add((SolaceServiceCredentialsImpl) credReader.readValue(raw));
         }
 
-        for (SolaceServiceCredentials svcCreds : svcsCreds) svcCreds.setId(getServiceId(svcCreds));
-        return svcsCreds;
+        for (SolaceServiceCredentialsImpl svcCreds : svcsCreds) svcCreds.setId(getServiceId(svcCreds));
+        return new LinkedList<SolaceServiceCredentials>(svcsCreds);
     }
 
     private String getServiceId(SolaceMessagingServiceInfo solaceMessagingServiceInfo) {

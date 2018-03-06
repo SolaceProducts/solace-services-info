@@ -7,31 +7,31 @@ import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 
-public class SolaceServiceCredentialsTest {
+public class SolaceServiceCredentialsImplTest {
 
     @Test
     public void testEqual() {
-        SolaceServiceCredentials ssi = getTestSolaceServiceInfo();
-        SolaceServiceCredentials otherSsi = getTestSolaceServiceInfo();
+        SolaceServiceCredentialsImpl ssi = getTestSolaceServiceInfo();
+        SolaceServiceCredentialsImpl otherSsi = getTestSolaceServiceInfo();
         assertEquals(ssi, otherSsi);
     }
 
     @Test
     public void testHashCode() {
-        SolaceServiceCredentials ssi = getTestSolaceServiceInfo();
-        SolaceServiceCredentials otherSsi = getTestSolaceServiceInfo();
+        SolaceServiceCredentialsImpl ssi = getTestSolaceServiceInfo();
+        SolaceServiceCredentialsImpl otherSsi = getTestSolaceServiceInfo();
         assertEquals(ssi.hashCode(), otherSsi.hashCode());
     }
 
     @Test
     public void testToString() {
-        SolaceServiceCredentials ssi = getTestSolaceServiceInfo();
-        SolaceServiceCredentials otherSsi = getTestSolaceServiceInfo();
+        SolaceServiceCredentialsImpl ssi = getTestSolaceServiceInfo();
+        SolaceServiceCredentialsImpl otherSsi = getTestSolaceServiceInfo();
         assertEquals(ssi.toString(), otherSsi.toString());
     }
 
-    private SolaceServiceCredentials getTestSolaceServiceInfo() {
-        SolaceServiceCredentials ssi = new SolaceServiceCredentials();
+    private SolaceServiceCredentialsImpl getTestSolaceServiceInfo() {
+        SolaceServiceCredentialsImpl ssi = new SolaceServiceCredentialsImpl();
         ssi.setId("full-credentials-instance");
         ssi.setClientUsername("sample-client-username");
         ssi.setClientPassword("sample-client-password");
