@@ -16,11 +16,11 @@ public interface SolaceServiceCredentials {
     String getClientUsername();
     String getClientPassword();
     String getMsgVpnName();
-    List<String> getSmfHosts();
-    List<String> getSmfTlsHosts();
-    List<String> getSmfZipHosts();
-    List<String> getJmsJndiUris();
-    List<String> getJmsJndiTlsUris();
+    String getSmfHost();
+    String getSmfTlsHost();
+    String getSmfZipHost();
+    String getJmsJndiUri();
+    String getJmsJndiTlsUri();
     List<String> getRestUris();
     List<String> getRestTlsUris();
     List<String> getAmqpUris();

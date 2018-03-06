@@ -1,6 +1,7 @@
 package com.solace.services.loader.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -70,6 +71,10 @@ public class SolaceServiceCredentialsImpl implements SolaceServiceCredentials {
     }
 
     @Override
+    public String getSmfHost() {
+        return StringUtils.join(smfHosts, ',');
+    }
+
     public List<String> getSmfHosts() {
         return smfHosts;
     }
@@ -79,6 +84,10 @@ public class SolaceServiceCredentialsImpl implements SolaceServiceCredentials {
     }
 
     @Override
+    public String getSmfTlsHost() {
+        return StringUtils.join(smfTlsHosts, ',');
+    }
+
     public List<String> getSmfTlsHosts() {
         return smfTlsHosts;
     }
@@ -88,6 +97,10 @@ public class SolaceServiceCredentialsImpl implements SolaceServiceCredentials {
     }
 
     @Override
+    public String getSmfZipHost() {
+        return StringUtils.join(smfZipHosts, ',');
+    }
+
     public List<String> getSmfZipHosts() {
         return smfZipHosts;
     }
@@ -97,6 +110,10 @@ public class SolaceServiceCredentialsImpl implements SolaceServiceCredentials {
     }
 
     @Override
+    public String getJmsJndiUri() {
+        return StringUtils.join(jmsJndiUris, ',');
+    }
+
     public List<String> getJmsJndiUris() {
         return jmsJndiUris;
     }
@@ -106,6 +123,10 @@ public class SolaceServiceCredentialsImpl implements SolaceServiceCredentials {
     }
 
     @Override
+    public String getJmsJndiTlsUri() {
+        return StringUtils.join(jmsJndiTlsUris, ',');
+    }
+
     public List<String> getJmsJndiTlsUris() {
         return jmsJndiTlsUris;
     }
