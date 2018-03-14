@@ -243,6 +243,10 @@ public class SolaceServiceCredentialsImpl implements SolaceServiceCredentials {
         this.activeManagementHostname = activeManagementHostname;
     }
 
+    public boolean isHA(){
+        return getSmfHost() != null && getSmfHost().contains(",");
+    }
+
     /*
      * (non-Javadoc)
      *

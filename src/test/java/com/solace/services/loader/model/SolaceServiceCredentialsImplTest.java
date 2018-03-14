@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class SolaceServiceCredentialsImplTest {
 
@@ -28,6 +30,15 @@ public class SolaceServiceCredentialsImplTest {
         SolaceServiceCredentialsImpl ssi = getTestSolaceServiceInfo();
         SolaceServiceCredentialsImpl otherSsi = getTestSolaceServiceInfo();
         assertEquals(ssi.toString(), otherSsi.toString());
+    }
+
+    @Test
+    public void testIsHA() {
+        SolaceServiceCredentialsImpl ssi = getTestSolaceServiceInfo();
+        ssi.setSmfHosts(Collections.singletonList("tcp://192.168.1.50:7000"));
+        assertFalse(ssi.isHA());
+        ssi.setSmfHosts(Arrays.asList("tcp://192.168.1.50:7000", "tcp://192.168.1.51:7000"));
+        assertTrue(ssi.isHA());
     }
 
     private SolaceServiceCredentialsImpl getTestSolaceServiceInfo() {
