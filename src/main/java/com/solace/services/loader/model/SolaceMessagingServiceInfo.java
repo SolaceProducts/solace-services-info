@@ -4,16 +4,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SolaceMessagingServiceInfo {
-    private SolaceServiceCredentials credentials;
+    private SolaceServiceCredentialsImpl credentials;
     private String name;
 
-    public SolaceServiceCredentials getCredentials() {
+    public SolaceServiceCredentialsImpl getCredentials() {
         return credentials;
     }
 
-    public void setCredentials(SolaceServiceCredentials credentials) {
+    public void setCredentials(SolaceServiceCredentialsImpl credentials) {
         this.credentials = credentials;
-        if (this.name != null && !this.name.isEmpty()) this.credentials.setId(name);
     }
 
     public String getName() {
@@ -22,6 +21,5 @@ public class SolaceMessagingServiceInfo {
 
     public void setName(String name) {
         this.name = name;
-        if (this.credentials != null) this.credentials.setId(name);
     }
 }

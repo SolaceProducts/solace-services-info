@@ -6,32 +6,43 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-public class SolaceServiceCredentialsTest {
+public class SolaceServiceCredentialsImplTest {
 
     @Test
     public void testEqual() {
-        SolaceServiceCredentials ssi = getTestSolaceServiceInfo();
-        SolaceServiceCredentials otherSsi = getTestSolaceServiceInfo();
+        SolaceServiceCredentialsImpl ssi = getTestSolaceServiceInfo();
+        SolaceServiceCredentialsImpl otherSsi = getTestSolaceServiceInfo();
         assertEquals(ssi, otherSsi);
     }
 
     @Test
     public void testHashCode() {
-        SolaceServiceCredentials ssi = getTestSolaceServiceInfo();
-        SolaceServiceCredentials otherSsi = getTestSolaceServiceInfo();
+        SolaceServiceCredentialsImpl ssi = getTestSolaceServiceInfo();
+        SolaceServiceCredentialsImpl otherSsi = getTestSolaceServiceInfo();
         assertEquals(ssi.hashCode(), otherSsi.hashCode());
     }
 
     @Test
     public void testToString() {
-        SolaceServiceCredentials ssi = getTestSolaceServiceInfo();
-        SolaceServiceCredentials otherSsi = getTestSolaceServiceInfo();
+        SolaceServiceCredentialsImpl ssi = getTestSolaceServiceInfo();
+        SolaceServiceCredentialsImpl otherSsi = getTestSolaceServiceInfo();
         assertEquals(ssi.toString(), otherSsi.toString());
     }
 
-    private SolaceServiceCredentials getTestSolaceServiceInfo() {
-        SolaceServiceCredentials ssi = new SolaceServiceCredentials();
+    @Test
+    public void testIsHA() {
+        SolaceServiceCredentialsImpl ssi = getTestSolaceServiceInfo();
+        ssi.setSmfHosts(Collections.singletonList("tcp://192.168.1.50:7000"));
+        assertFalse(ssi.isHA());
+        ssi.setSmfHosts(Arrays.asList("tcp://192.168.1.50:7000", "tcp://192.168.1.51:7000"));
+        assertTrue(ssi.isHA());
+    }
+
+    private SolaceServiceCredentialsImpl getTestSolaceServiceInfo() {
+        SolaceServiceCredentialsImpl ssi = new SolaceServiceCredentialsImpl();
         ssi.setId("full-credentials-instance");
         ssi.setClientUsername("sample-client-username");
         ssi.setClientPassword("sample-client-password");
