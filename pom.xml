@@ -45,9 +45,9 @@
     </developers>
 
     <scm>
-        <url>https://github.com/SolaceDev/solace-services-info-loader.git</url>
-        <connection>scm:git:git://github.com/SolaceDev/solace-services-info-loader.git</connection>
-        <developerConnection>scm:git:git@github.com:SolaceDev/solace-services-info-loader.git</developerConnection>
+        <url>https://github.com/SolaceProducts/solace-services-info-loader.git</url>
+        <connection>scm:git:git://github.com/SolaceProducts/solace-services-info-loader.git</connection>
+        <developerConnection>scm:git:git@github.com:SolaceProducts/solace-services-info-loader.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
