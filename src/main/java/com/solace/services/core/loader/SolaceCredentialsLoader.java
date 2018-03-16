@@ -1,13 +1,11 @@
-package com.solace.services.loader;
+package com.solace.services.core.loader;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
-import com.solace.services.loader.model.SolCapServicesInfo;
-import com.solace.services.loader.model.SolaceMessagingServiceInfo;
-import com.solace.services.loader.model.SolaceServiceCredentials;
-import com.solace.services.loader.model.SolaceServiceCredentialsImpl;
+import com.solace.services.core.model.SolaceServiceCredentials;
+import com.solace.services.core.model.SolaceServiceCredentialsImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -61,7 +59,7 @@ public class SolaceCredentialsLoader {
     static {
         ObjectMapper objectMapper = ObjectMapperSingleton.getInstance();
         defaultReader = objectMapper.reader();
-        servicesReader = objectMapper.readerFor(SolCapServicesInfo.class);
+        servicesReader = objectMapper.readerFor(VCAPServicesInfo.class);
         credsListReader = objectMapper.readerFor(new TypeReference<List<SolaceServiceCredentialsImpl>>(){});
         credReader = objectMapper.readerFor(SolaceServiceCredentialsImpl.class);
     }
@@ -118,7 +116,7 @@ public class SolaceCredentialsLoader {
         JsonNode node = defaultReader.readTree(raw);
 
         if (node.isObject() && node.has(SOLACE_MESSAGING_SVC_NAME)) {
-            SolCapServicesInfo services = servicesReader.readValue(raw);
+            VCAPServicesInfo services = servicesReader.readValue(raw);
             for (SolaceMessagingServiceInfo serviceInfo : services.getSolaceMessagingServices()) {
                 SolaceServiceCredentialsImpl svcCreds = serviceInfo.getCredentials();
                 svcCreds.setId(getServiceId(serviceInfo));

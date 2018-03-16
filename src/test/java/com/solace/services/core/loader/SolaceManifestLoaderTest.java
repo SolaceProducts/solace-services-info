@@ -1,4 +1,4 @@
-package com.solace.services.loader;
+package com.solace.services.core.loader;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
@@ -28,10 +28,10 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import static com.solace.services.loader.SolaceManifestLoader.MANIFEST_FILE_NAME;
-import static com.solace.services.loader.SolaceManifestLoader.SolaceEnv;
-import static com.solace.services.loader.SolaceManifestLoader.SolaceEnvSource;
-import static com.solace.services.loader.SolaceManifestLoader.PostProcessor;
+import static com.solace.services.core.loader.SolaceManifestLoader.MANIFEST_FILE_NAME;
+import static com.solace.services.core.loader.SolaceManifestLoader.SolaceEnv;
+import static com.solace.services.core.loader.SolaceManifestLoader.SolaceEnvSource;
+import static com.solace.services.core.loader.SolaceManifestLoader.PostProcessor;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;

@@ -1,9 +1,10 @@
-package com.solace.services.loader.model;
+package com.solace.services.core.loader;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.solace.services.core.model.SolaceServiceCredentialsImpl;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SolaceMessagingServiceInfo {
+class SolaceMessagingServiceInfo {
     private SolaceServiceCredentialsImpl credentials;
     private String name;
 

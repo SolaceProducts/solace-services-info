@@ -1,4 +1,4 @@
-package com.solace.services.loader.model;
+package com.solace.services.core.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.apache.commons.lang3.StringUtils;

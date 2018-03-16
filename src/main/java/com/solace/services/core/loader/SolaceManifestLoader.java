@@ -1,4 +1,4 @@
-package com.solace.services.loader;
+package com.solace.services.core.loader;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;

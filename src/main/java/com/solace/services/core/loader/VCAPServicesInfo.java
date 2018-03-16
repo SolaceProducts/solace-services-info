@@ -1,4 +1,4 @@
-package com.solace.services.loader.model;
+package com.solace.services.core.loader;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SolCapServicesInfo {
+class VCAPServicesInfo {
     @JsonProperty("solace-messaging") private List<SolaceMessagingServiceInfo> solaceMessagingServices;
 
     public List<SolaceMessagingServiceInfo> getSolaceMessagingServices() {

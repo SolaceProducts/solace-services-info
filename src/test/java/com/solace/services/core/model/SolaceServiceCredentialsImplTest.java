@@ -1,4 +1,4 @@
-package com.solace.services.loader.model;
+package com.solace.services.core.model;
 
 import org.junit.Test;
 

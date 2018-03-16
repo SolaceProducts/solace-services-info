@@ -1,4 +1,4 @@
-package com.solace.services.loader;
+package com.solace.services.core.loader;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

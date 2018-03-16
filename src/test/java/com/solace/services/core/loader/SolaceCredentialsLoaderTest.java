@@ -1,10 +1,8 @@
-package com.solace.services.loader;
+package com.solace.services.core.loader;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.solace.services.loader.model.SolCapServicesInfo;
-import com.solace.services.loader.model.SolaceMessagingServiceInfo;
-import com.solace.services.loader.model.SolaceServiceCredentials;
-import com.solace.services.loader.model.SolaceServiceCredentialsImpl;
+import com.solace.services.core.model.SolaceServiceCredentials;
+import com.solace.services.core.model.SolaceServiceCredentialsImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Before;
@@ -55,7 +53,7 @@ public class SolaceCredentialsLoaderTest {
         String testCAP = String.format(new String(Files.readAllBytes(Paths.get(servicesPath))), testCreds);
 
         // -- Setup Test Objects --
-        SolCapServicesInfo services = objectMapper.readerFor(SolCapServicesInfo.class).readValue(testCAP);
+        VCAPServicesInfo services = objectMapper.readerFor(VCAPServicesInfo.class).readValue(testCAP);
         SolaceServiceCredentialsImpl oneCreds = objectMapper.readerFor(SolaceServiceCredentialsImpl.class).readValue(testCreds);
         List<SolaceServiceCredentialsImpl> credsList = new LinkedList<>();
         credsList.add(oneCreds);
