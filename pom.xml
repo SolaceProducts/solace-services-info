@@ -22,7 +22,7 @@
     <groupId>com.solace.messaging</groupId>
     <artifactId>solace-services-info</artifactId>
     <packaging>jar</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.0.1-SNAPSHOT</version>
     <name>Solace Messaging Service Credentials Loader</name>
     <description>Loader for non-PAAS-deployed applications to fetch Solace Messaging service credentials.</description>
 
