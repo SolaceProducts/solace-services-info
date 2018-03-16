@@ -18,9 +18,7 @@ import java.util.List;
  *
  * <p>The manifest load order is as follows:</p>
  * <ol>
- *     <li>{@link SolaceManifestLoader.SolaceEnv#SOLACE_CREDENTIALS SOLACE_CREDENTIALS} in the JVM properties.</li>
  *     <li>{@link SolaceManifestLoader.SolaceEnv#SOLCAP_SERVICES SOLCAP_SERVICES} in the JVM properties.</li>
- *     <li>{@link SolaceManifestLoader.SolaceEnv#SOLACE_CREDENTIALS SOLACE_CREDENTIALS} as an OS environment.</li>
  *     <li>{@link SolaceManifestLoader.SolaceEnv#SOLCAP_SERVICES SOLCAP_SERVICES} as an OS environment.</li>
  *     <li>{@link SolaceManifestLoader.SolaceEnv#SOLACE_SERVICES_HOME SOLACE_SERVICES_HOME} in the JVM properties.</li>
  *     <li>{@link SolaceManifestLoader.SolaceEnv#SOLACE_SERVICES_HOME SOLACE_SERVICES_HOME} as an OS environment.</li>
@@ -43,9 +41,9 @@ class SolaceManifestLoader {
 
     public SolaceManifestLoader() {
         searchQueries = new LinkedList<>();
-        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLACE_CREDENTIALS, SolaceEnvSource.JVM, PostProcessor.REST));
+//        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLACE_CREDENTIALS, SolaceEnvSource.JVM, PostProcessor.REST));
         searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLCAP_SERVICES, SolaceEnvSource.JVM, PostProcessor.NONE));
-        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLACE_CREDENTIALS, SolaceEnvSource.ENV, PostProcessor.REST));
+//        searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLACE_CREDENTIALS, SolaceEnvSource.ENV, PostProcessor.REST));
         searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLCAP_SERVICES, SolaceEnvSource.ENV, PostProcessor.NONE));
         searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLACE_SERVICES_HOME, SolaceEnvSource.JVM, PostProcessor.FILE));
         searchQueries.add(new ImmutableTriple<>(SolaceEnv.SOLACE_SERVICES_HOME, SolaceEnvSource.ENV, PostProcessor.FILE));
