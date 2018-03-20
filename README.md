@@ -4,7 +4,7 @@
 
 # Solace Services Info
 
-Solace Services Info is a lightweight library which defines the common models used in creating Solace Messaging service connections. Packaged within this project is also a utility that applications deployed on a non-cloud-platform may use for fetching Solace Messaging service credentials.
+Solace Services Info is a lightweight library which defines the common models used to describe Solace Messaging service connections. Packaged within this project is also a utility which non-cloud-platform-deployed applications can use to fetch Solace Messaging service credentials.
 
 ## Contents
 
@@ -25,7 +25,7 @@ Solace Services Info is a lightweight library which defines the common models us
 
 ### The Models
 
-This project contains within it a few models that an application may use to represent the credentials to Solace Messaging services:
+This project contains within it a few models to represent the credentials for Solace Messaging services:
 
 <dl>
     <dt>SolaceServiceCredentials</dt>
@@ -51,6 +51,10 @@ Map<String, SolaceServiceCredentials> solaceServicesCredentials = solaceCredenti
 // Gets the credentials for the first detected Solace Messaging service
 SolaceServiceCredentials solaceServicesCredentials = solaceCredentialsLoader.getSolaceServiceInfo();
 ```
+
+The two following projects are real examples that use this as one of the options for fetching service credentials to auto-configure Solace Java/JMS connections:
+* [Spring Boot Auto-Configuration for the Solace Java API](https://github.com/SolaceProducts/solace-java-spring-boot)
+* [Spring Boot Auto-Configuration for the Solace JMS API](https://github.com/SolaceProducts/solace-jms-spring-boot)
 
 Please refer to [Manifest Load Order and Expected Formats](#manifest-load-order-and-expected-formats) for more information about the supported manifest formats and the ways in which you can provide it.
 
@@ -83,14 +87,14 @@ The releases from this project are hosted in [Maven Central](https://mvnreposito
 
 ### Using it with Gradle
 
-```
+```groovy
 // Solace Services Info
 compile("com.solace.cloud.core:solace-services-info:0.0.+")
 ```
 
 ### Using it with Maven
 
-```
+```xml
 <!-- Solace Services Info -->
 <dependency>
   <groupId>com.solace.cloud.core</groupId>
@@ -110,7 +114,7 @@ This project depends on maven for building. To build the jar locally, check out 
 This will build a jar file which will be named similar to the following:
 
 ```
-target/solace-services-info-1.3.0-SNAPSHOT.jar
+target/solace-services-info-0.0.1-SNAPSHOT.jar
 ```
 
 You can install this file in your maven repository locally.
