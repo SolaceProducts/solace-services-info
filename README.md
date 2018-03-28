@@ -74,11 +74,11 @@ The order in which the loader searches its environment is currently defined as f
 
 Now to marshal the JSON into `SolaceServiceCredentials` objects, the manifest must conform to one of the following formats:
 
-| Manifest Format | Manifest Detection Handle | Default Solace-Messaging Service ID | Example |
+| Manifest Format | Manifest Detection Handle | Service ID Resolution Order | Example |
 | --------------- | ------------------------- | ------------------------------------| ------ |
-| `VCAP_SERVICES`-Formatted Map of Services | An object-type root node with key "solace-messaging" | The meta-name of the service if it exists, `{VPN-name}@{active-management-hostname}` otherwise | [Link](samples/vcap-formatted-manifest.json) |
-| Array of Service Credentials | An array-type root node | `{VPN-name}@{active-management-hostname}`| [Link](samples/service-credentials-list-manifest.json) |
-| Service Credentials for a Single Service | Default | `{VPN-name}@{active-management-hostname}`| [Link](samples/single-service-credentials-manifest.json) |
+| `VCAP_SERVICES`-Formatted Map of Services | An object-type root node with key "solace-messaging" | <ol><li>An ID in the credentials</li><li>The service's meta-name</li><li>`{VPN-name}@{active-management-hostname}`</li></ol> | [Link](samples/vcap-formatted-manifest.json) |
+| Array of Service Credentials | An array-type root node | <ol><li>An ID in the credentials</li><li>`{VPN-name}@{active-management-hostname}`</li></ol> | [Link](samples/service-credentials-list-manifest.json) |
+| Service Credentials for a Single Service | Default | <ol><li>An ID in the credentials</li><li>`{VPN-name}@{active-management-hostname}`</li></ol> | [Link](samples/single-service-credentials-manifest.json) |
 
 
 ## Using it in your Application

@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -25,7 +26,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.runners.Parameterized.Parameter;
@@ -48,31 +48,34 @@ public class SolaceCredentialsLoaderTest {
         String credsPath = resourcesDir.concat("test-service-credentials.json.template");
         String servicesPath = resourcesDir.concat("test-services-manifest.json.template");
 
+        // -- Setup Test Manifests --
         String testCreds = new String(Files.readAllBytes(Paths.get(credsPath)));
+        String testCredsWithID = createManifestWithCredentialsID(testCreds);
+
         String testCredsList = String.format("[%s]", testCreds);
-        String testCAP = String.format(new String(Files.readAllBytes(Paths.get(servicesPath))), testCreds);
+        String testCredsListWithID = String.format("[%s]", testCredsWithID);
+
+        String testVCAP = String.format(new String(Files.readAllBytes(Paths.get(servicesPath))), testCreds);
+        String testVCAPWithID = createManifestWithCredentialsID(testVCAP);
+        String testVCAPWithoutMetaName = testVCAP.replaceAll("\"name\"\\s*?:.*?,", "");
 
         // -- Setup Test Objects --
-        VCAPServicesInfo services = objectMapper.readerFor(VCAPServicesInfo.class).readValue(testCAP);
-        SolaceServiceCredentialsImpl oneCreds = objectMapper.readerFor(SolaceServiceCredentialsImpl.class).readValue(testCreds);
-        List<SolaceServiceCredentialsImpl> credsList = new LinkedList<>();
-        credsList.add(oneCreds);
+        List<SolaceServiceCredentials> credsList = createTestCredsList(createTestCreds(testCreds));
+        List<SolaceServiceCredentials> credsListWithIDs = createTestCredsList(createTestCreds(testCredsWithID));
 
-        List<SolaceServiceCredentials> testCAPCreds = new ArrayList<>();
-        for (SolaceMessagingServiceInfo smInfo : services.getSolaceMessagingServices()) {
-            SolaceServiceCredentialsImpl sCreds = smInfo.getCredentials();
-            sCreds.setId(smInfo.getName());
-            testCAPCreds.add(sCreds);
-        }
-
-        for (SolaceServiceCredentialsImpl creds : credsList)
-            creds.setId(creds.getMsgVpnName() + '@' + creds.getActiveManagementHostname());
+        List<SolaceServiceCredentials> testVCAPCreds = createTestVCAPCreds(testVCAP);
+        List<SolaceServiceCredentials> testVCAPCredsWithID = createTestVCAPCreds(testVCAPWithID);
+        List<SolaceServiceCredentials> testVCAPCredsWithoutMetaName = createTestVCAPCreds(testVCAPWithoutMetaName);
 
         // -- Setup JUnit Parameters --
         Set<Object[]> parameters = new HashSet<>();
-        parameters.add(new Object[] {"CAP-Manifest", testCAP, testCAPCreds});
+        parameters.add(new Object[] {"VCAP-Manifest", testVCAP, testVCAPCreds});
+        parameters.add(new Object[] {"VCAP-Manifest With Predefined ID", testVCAPWithID, testVCAPCredsWithID});
+        parameters.add(new Object[] {"VCAP-Manifest Without Meta Name", testVCAPWithoutMetaName, testVCAPCredsWithoutMetaName});
         parameters.add(new Object[] {"Multi-Service Credentials List", testCredsList, credsList});
+        parameters.add(new Object[] {"Multi-Service Credentials List With Predefined ID", testCredsListWithID, credsListWithIDs});
         parameters.add(new Object[] {"Single-Service Credentials", testCreds, credsList});
+        parameters.add(new Object[] {"Single-Service Credentials With Predefined ID", testCredsWithID, credsListWithIDs });
         return parameters;
     }
 
@@ -113,20 +116,41 @@ public class SolaceCredentialsLoaderTest {
         assertTrue(sscLoader.manifestExists());
     }
 
-    @Test
-    public void testPredefinedServiceId() {
+    private static List<SolaceServiceCredentials> createTestVCAPCreds(String vcapManifest) throws IOException {
+        VCAPServicesInfo services = objectMapper.readerFor(VCAPServicesInfo.class).readValue(vcapManifest);
+        List<SolaceServiceCredentials> testVCAPCreds = new ArrayList<>();
+        for (SolaceMessagingServiceInfo smInfo : services.getSolaceMessagingServices()) {
+            SolaceServiceCredentialsImpl sCreds = smInfo.getCredentials();
+            if (sCreds.getId() == null || sCreds.getId().isEmpty()) sCreds.setId(getDefaultServiceID(smInfo));
+            testVCAPCreds.add(sCreds);
+        }
+        return testVCAPCreds;
+    }
+
+    private static SolaceServiceCredentials createTestCreds(String singleCredsManifest) throws IOException {
+        SolaceServiceCredentialsImpl oneCreds = objectMapper.readerFor(SolaceServiceCredentialsImpl.class)
+                .readValue(singleCredsManifest);
+        if (oneCreds.getId() == null || oneCreds.getId().isEmpty()) oneCreds.setId(getDefaultServiceID(oneCreds));
+        return oneCreds;
+    }
+
+    private static String getDefaultServiceID(SolaceMessagingServiceInfo smInfo) {
+        if (smInfo.getName() != null && !smInfo.getName().isEmpty()) return smInfo.getName();
+        else return getDefaultServiceID(smInfo.getCredentials());
+    }
+
+    private static String getDefaultServiceID(SolaceServiceCredentialsImpl solaceServiceCredentials) {
+        return solaceServiceCredentials.getMsgVpnName() + '@' + solaceServiceCredentials.getActiveManagementHostname();
+    }
+
+    private static List<SolaceServiceCredentials> createTestCredsList(SolaceServiceCredentials... creds) {
+        return new LinkedList<>(Arrays.asList(creds));
+    }
+
+    private static String createManifestWithCredentialsID(String manifest) {
         String testId = "test-id";
-        String testManifestWithId = testManifest
-                .replaceAll("\n", " ")
+        return manifest.replaceAll("\n", " ")
                 .replaceAll("\\s+", " ")
                 .replaceFirst("(\"msgVpnName\"\\s*?:.*?,)", String.format("$1 \"id\": \"%s\",", testId));
-
-        Mockito.when(manifestLoader.getManifest()).thenReturn(testManifestWithId);
-
-        assertTrue(String.format("No service found with predefined test ID of %s", testId),
-                sscLoader.getAllSolaceServiceInfo().containsKey(testId));
-
-        assertNotNull(String.format("No service found with predefined test ID of %s", testId),
-                sscLoader.getSolaceServiceInfo(testId));
     }
 }
