@@ -133,9 +133,15 @@ public class SolaceCredentialsLoader {
     }
 
     private String getServiceId(SolaceMessagingServiceInfo solaceMessagingServiceInfo) {
-        // Default: Service's meta-name
-        String id = solaceMessagingServiceInfo.getCredentials().getId();
-        return id != null && !id.isEmpty() ? id : solaceMessagingServiceInfo.getName();
+        // Default: Service's meta-name if it exists,
+        //          '@'-delimited concatenation of the service's VPN name and active management host name otherwise
+        SolaceServiceCredentials solaceServiceCredentials = solaceMessagingServiceInfo.getCredentials();
+        String id = solaceServiceCredentials.getId();
+        String metaName = solaceMessagingServiceInfo.getName();
+
+        if (id != null && !id.isEmpty()) return id;
+        else if (metaName != null && !metaName.isEmpty()) return metaName;
+        else return getServiceId(solaceServiceCredentials);
     }
 
     private String getServiceId(SolaceServiceCredentials solaceServiceCredentials) {
@@ -143,6 +149,7 @@ public class SolaceCredentialsLoader {
         String id = solaceServiceCredentials.getId();
         String msgVpnName = solaceServiceCredentials.getMsgVpnName();
         String activeManagementHostname = solaceServiceCredentials.getActiveManagementHostname();
+
         return id != null && !id.isEmpty() ? id : msgVpnName+'@'+activeManagementHostname;
     }
 }
