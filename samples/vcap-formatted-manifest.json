@@ -1,0 +1,63 @@
+{
+ "solace-messaging": [
+  {
+   "credentials": {
+	 "activeManagementHostname": "shared-vmr-0.local.pcfdev.io",
+	 "amqpTlsUris": [
+	   "amqps://10.244.0.128:7158"
+	 ],
+	 "amqpUris": [
+	   "amqp://10.244.0.128:7157"
+	 ],
+	 "clientPassword": "cba5e380-c900-4636-95e7-3c2e006add3c",
+	 "clientUsername": "v003.cu000023",
+	 "jmsJndiTlsUris": [
+	   "smfs://10.244.0.128:7004"
+	 ],
+	 "jmsJndiUris": [
+	   "smf://10.244.0.128:7001"
+	 ],
+	 "managementHostnames": [
+	   "shared-vmr-0.local.pcfdev.io"
+	 ],
+	 "managementPassword": "aadbd38032fc40ae928b19f143778acf",
+	 "managementUsername": "v003-mgmt",
+	 "mqttTlsUris": [
+	   "ssl://10.244.0.128:7154"
+	 ],
+	 "mqttUris": [
+	   "tcp://10.244.0.128:7153"
+	 ],
+	 "mqttWsUris": [
+	   "ws://10.244.0.128:7155"
+	 ],
+	 "mqttWssUris": [
+	   "wss://10.244.0.128:7156"
+	 ],
+	 "msgVpnName": "v003",
+	 "restTlsUris": [
+	   "https://10.244.0.128:7152"
+	 ],
+	 "restUris": [
+	   "http://10.244.0.128:7151"
+	 ],
+	 "smfHosts": [
+	   "tcp://10.244.0.128:7001"
+	 ],
+	 "smfTlsHosts": [
+	   "tcps://10.244.0.128:7004"
+	 ],
+	 "smfZipHosts": [
+	   "tcp://10.244.0.128:7002"
+	 ],
+	 "webMessagingTlsUris": [
+	   "https://10.244.0.128:7006"
+	 ],
+	 "webMessagingUris": [
+	   "http://10.244.0.128:7005"
+	 ]
+   },
+   "name": "test-service"
+  }
+ ]
+}
