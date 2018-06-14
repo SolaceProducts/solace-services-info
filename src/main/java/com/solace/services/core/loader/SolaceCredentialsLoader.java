@@ -54,7 +54,7 @@ public class SolaceCredentialsLoader {
     private static final ObjectReader servicesReader;
     private static final ObjectReader credsListReader;
     private static final ObjectReader credReader;
-    private static final String SOLACE_MESSAGING_SVC_NAME = "solace-messaging";
+    private static final String SOLACE_MESSAGING_SVC_NAME = "solace-pubsub";
 
     static {
         ObjectMapper objectMapper = ObjectMapperSingleton.getInstance();

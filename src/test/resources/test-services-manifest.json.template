@@ -1,5 +1,5 @@
 {
-  "solace-messaging": [
+  "solace-pubsub": [
     {
       "credentials": %s,
       "label": "solace-messaging",

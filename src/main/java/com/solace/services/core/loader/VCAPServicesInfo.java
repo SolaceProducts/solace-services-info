@@ -7,7 +7,7 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 class VCAPServicesInfo {
-    @JsonProperty("solace-messaging") private List<SolaceMessagingServiceInfo> solaceMessagingServices;
+    @JsonProperty("solace-pubsub") private List<SolaceMessagingServiceInfo> solaceMessagingServices;
 
     public List<SolaceMessagingServiceInfo> getSolaceMessagingServices() {
         return solaceMessagingServices;
