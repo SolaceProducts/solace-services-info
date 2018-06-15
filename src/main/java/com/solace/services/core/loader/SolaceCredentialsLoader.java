@@ -54,7 +54,8 @@ public class SolaceCredentialsLoader {
     private static final ObjectReader servicesReader;
     private static final ObjectReader credsListReader;
     private static final ObjectReader credReader;
-    private static final String SOLACE_MESSAGING_SVC_NAME = "solace-pubsub";
+    private static final String SOLACE_MESSAGING_SVC_NAME = "solace-messaging";
+    private static final String SOLACE_PUBSUB_SVC_NAME = "solace-pubsub";
 
     static {
         ObjectMapper objectMapper = ObjectMapperSingleton.getInstance();
@@ -115,7 +116,7 @@ public class SolaceCredentialsLoader {
         List<SolaceServiceCredentialsImpl> svcsCreds = new LinkedList<>();
         JsonNode node = defaultReader.readTree(raw);
 
-        if (node.isObject() && node.has(SOLACE_MESSAGING_SVC_NAME)) {
+        if (node.isObject() && ( node.has(SOLACE_MESSAGING_SVC_NAME) || node.has(SOLACE_PUBSUB_SVC_NAME) ) ) {
             VCAPServicesInfo services = servicesReader.readValue(raw);
             for (SolaceMessagingServiceInfo serviceInfo : services.getSolaceMessagingServices()) {
                 SolaceServiceCredentialsImpl svcCreds = serviceInfo.getCredentials();
