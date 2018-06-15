@@ -87,7 +87,7 @@ public class SolaceManifestLoaderTest {
     @BeforeClass
     public static void setupTestServiceManifest() throws IOException {
         String credentialsPath = resourcesDir.concat("test-service-credentials.json.template");
-        String servicesPath = resourcesDir.concat("test-services-manifest.json.template");
+        String servicesPath = resourcesDir.concat("test-solace-pubsub-services-manifest.json.template");
         testManifest = String.format(
                 new String(Files.readAllBytes(Paths.get(servicesPath))),
                 new String(Files.readAllBytes(Paths.get(credentialsPath))));

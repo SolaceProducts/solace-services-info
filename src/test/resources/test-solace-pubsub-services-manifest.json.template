@@ -1,0 +1,28 @@
+{
+  "solace-pubsub": [
+    {
+      "credentials": %s,
+      "label": "solace-pubsub",
+      "name": "solace-messaging-sample-instance",
+      "plan": "shared",
+      "provider": null,
+      "syslog_drain_url": null,
+      "tags": [
+        "solace",
+        "solace-messaging",
+        "rest",
+        "mqtt",
+        "mq",
+        "queue",
+        "event-streaming",
+        "amqp",
+        "jms",
+        "messaging",
+        "publish-subscribe",
+        "message-queuing",
+        "request-reply"
+      ],
+      "volume_mounts": []
+    }
+  ]
+}

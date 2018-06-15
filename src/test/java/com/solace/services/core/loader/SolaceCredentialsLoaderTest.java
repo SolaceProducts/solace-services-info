@@ -45,37 +45,47 @@ public class SolaceCredentialsLoaderTest {
 
     @Parameters(name = "{0}")
     public static Collection<Object[]> parameterData() throws IOException {
+        // Run tests with two types of service labels: solace-messaging and solace-pubsub
+        List<String> servicePaths = new ArrayList<>();
+        servicePaths.add(resourcesDir.concat("test-solace-messaging-services-manifest.json.template"));
+        servicePaths.add(resourcesDir.concat("test-solace-pubsub-services-manifest.json.template"));
+
         String credsPath = resourcesDir.concat("test-service-credentials.json.template");
-        String servicesPath = resourcesDir.concat("test-services-manifest.json.template");
-
-        // -- Setup Test Manifests --
-        String testCreds = new String(Files.readAllBytes(Paths.get(credsPath)));
-        String testCredsWithID = createManifestWithCredentialsID(testCreds);
-
-        String testCredsList = String.format("[%s]", testCreds);
-        String testCredsListWithID = String.format("[%s]", testCredsWithID);
-
-        String testVCAP = String.format(new String(Files.readAllBytes(Paths.get(servicesPath))), testCreds);
-        String testVCAPWithID = createManifestWithCredentialsID(testVCAP);
-        String testVCAPWithoutMetaName = testVCAP.replaceAll("\"name\"\\s*?:.*?,", "");
-
-        // -- Setup Test Objects --
-        List<SolaceServiceCredentials> credsList = createTestCredsList(createTestCreds(testCreds));
-        List<SolaceServiceCredentials> credsListWithIDs = createTestCredsList(createTestCreds(testCredsWithID));
-
-        List<SolaceServiceCredentials> testVCAPCreds = createTestVCAPCreds(testVCAP);
-        List<SolaceServiceCredentials> testVCAPCredsWithID = createTestVCAPCreds(testVCAPWithID);
-        List<SolaceServiceCredentials> testVCAPCredsWithoutMetaName = createTestVCAPCreds(testVCAPWithoutMetaName);
 
         // -- Setup JUnit Parameters --
         Set<Object[]> parameters = new HashSet<>();
-        parameters.add(new Object[] {"VCAP-Manifest", testVCAP, testVCAPCreds});
-        parameters.add(new Object[] {"VCAP-Manifest With Predefined ID", testVCAPWithID, testVCAPCredsWithID});
-        parameters.add(new Object[] {"VCAP-Manifest Without Meta Name", testVCAPWithoutMetaName, testVCAPCredsWithoutMetaName});
-        parameters.add(new Object[] {"Multi-Service Credentials List", testCredsList, credsList});
-        parameters.add(new Object[] {"Multi-Service Credentials List With Predefined ID", testCredsListWithID, credsListWithIDs});
-        parameters.add(new Object[] {"Single-Service Credentials", testCreds, credsList});
-        parameters.add(new Object[] {"Single-Service Credentials With Predefined ID", testCredsWithID, credsListWithIDs });
+
+        for (String servicesPath : servicePaths) {
+
+            String serviceLabel = servicesPath.contains("pubsub") ? "pubsub" : "messaging";
+
+            // -- Setup Test Manifests --
+            String testCreds = new String(Files.readAllBytes(Paths.get(credsPath)));
+            String testCredsWithID = createManifestWithCredentialsID(testCreds);
+
+            String testCredsList = String.format("[%s]", testCreds);
+            String testCredsListWithID = String.format("[%s]", testCredsWithID);
+
+            String testVCAP = String.format(new String(Files.readAllBytes(Paths.get(servicesPath))), testCreds);
+            String testVCAPWithID = createManifestWithCredentialsID(testVCAP);
+            String testVCAPWithoutMetaName = testVCAP.replaceAll("\"name\"\\s*?:.*?,", "");
+
+            // -- Setup Test Objects --
+            List<SolaceServiceCredentials> credsList = createTestCredsList(createTestCreds(testCreds));
+            List<SolaceServiceCredentials> credsListWithIDs = createTestCredsList(createTestCreds(testCredsWithID));
+
+            List<SolaceServiceCredentials> testVCAPCreds = createTestVCAPCreds(testVCAP);
+            List<SolaceServiceCredentials> testVCAPCredsWithID = createTestVCAPCreds(testVCAPWithID);
+            List<SolaceServiceCredentials> testVCAPCredsWithoutMetaName = createTestVCAPCreds(testVCAPWithoutMetaName);
+
+            parameters.add(new Object[]{serviceLabel + "-VCAP-Manifest", testVCAP, testVCAPCreds});
+            parameters.add(new Object[]{serviceLabel + "-VCAP-Manifest With Predefined ID", testVCAPWithID, testVCAPCredsWithID});
+            parameters.add(new Object[]{serviceLabel + "-VCAP-Manifest Without Meta Name", testVCAPWithoutMetaName, testVCAPCredsWithoutMetaName});
+            parameters.add(new Object[]{serviceLabel + "-Multi-Service Credentials List", testCredsList, credsList});
+            parameters.add(new Object[]{serviceLabel + "-Multi-Service Credentials List With Predefined ID", testCredsListWithID, credsListWithIDs});
+            parameters.add(new Object[]{serviceLabel + "-Single-Service Credentials", testCreds, credsList});
+            parameters.add(new Object[]{serviceLabel + "-Single-Service Credentials With Predefined ID", testCredsWithID, credsListWithIDs});
+        }
         return parameters;
     }
 
