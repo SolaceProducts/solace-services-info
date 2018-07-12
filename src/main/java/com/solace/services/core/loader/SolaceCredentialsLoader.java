@@ -22,10 +22,10 @@ import java.util.Map;
  * <p>The manifest can take on one of the following forms:</p>
  *
  * <table summary="Valid manifest structures along with ID generation logic for each format.">
- *     <tr><th>Manifest Format</th><th>Manifest Detection Handle</th><th>Default Solace-Messaging Service ID</th></tr>
+ *     <tr><th>Manifest Format</th><th>Manifest Detection Handle</th><th>Default Solace PubSub+ Service ID</th></tr>
  *     <tr>
  *         <td>VCAP-Formatted Map of Services</td>
- *         <td> An object-type root node with key "solace-messaging".</td>
+ *         <td> An object-type root node with key "solace-pubsub".</td>
  *         <td>The meta-name of the service, otherwise an '@'-delimited concatenation of
  *              the {@link SolaceServiceCredentials#getMsgVpnName() VPN name} and
  *              the {@link SolaceServiceCredentials#getActiveManagementHostname() active management hostname}.</td>
