@@ -9,7 +9,7 @@
       "syslog_drain_url": null,
       "tags": [
         "solace",
-        "solace-messaging",
+        "solace-pubsub",
         "rest",
         "mqtt",
         "mq",
