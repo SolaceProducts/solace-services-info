@@ -22,10 +22,10 @@ import java.util.Map;
  * <p>The manifest can take on one of the following forms:</p>
  *
  * <table summary="Valid manifest structures along with ID generation logic for each format.">
- *     <tr><th>Manifest Format</th><th>Manifest Detection Handle</th><th>Default Solace-Messaging Service ID</th></tr>
+ *     <tr><th>Manifest Format</th><th>Manifest Detection Handle</th><th>Default Solace PubSub+ Service ID</th></tr>
  *     <tr>
  *         <td>VCAP-Formatted Map of Services</td>
- *         <td> An object-type root node with key "solace-messaging".</td>
+ *         <td> An object-type root node with key "solace-pubsub".</td>
  *         <td>The meta-name of the service, otherwise an '@'-delimited concatenation of
  *              the {@link SolaceServiceCredentials#getMsgVpnName() VPN name} and
  *              the {@link SolaceServiceCredentials#getActiveManagementHostname() active management hostname}.</td>
@@ -55,6 +55,7 @@ public class SolaceCredentialsLoader {
     private static final ObjectReader credsListReader;
     private static final ObjectReader credReader;
     private static final String SOLACE_MESSAGING_SVC_NAME = "solace-messaging";
+    private static final String SOLACE_PUBSUB_SVC_NAME = "solace-pubsub";
 
     static {
         ObjectMapper objectMapper = ObjectMapperSingleton.getInstance();
@@ -115,7 +116,7 @@ public class SolaceCredentialsLoader {
         List<SolaceServiceCredentialsImpl> svcsCreds = new LinkedList<>();
         JsonNode node = defaultReader.readTree(raw);
 
-        if (node.isObject() && node.has(SOLACE_MESSAGING_SVC_NAME)) {
+        if (node.isObject() && ( node.has(SOLACE_MESSAGING_SVC_NAME) || node.has(SOLACE_PUBSUB_SVC_NAME) ) ) {
             VCAPServicesInfo services = servicesReader.readValue(raw);
             for (SolaceMessagingServiceInfo serviceInfo : services.getSolaceMessagingServices()) {
                 SolaceServiceCredentialsImpl svcCreds = serviceInfo.getCredentials();

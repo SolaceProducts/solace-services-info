@@ -7,7 +7,7 @@ import java.util.List;
  * in SOLCAP_SERVICES without extra dependencies on any Solace Enterprise APIs.
  *
  * For more details see the GitHub project:
- *    - https://github.com/SolaceProducts/sl-solace-messaging-service-info
+ *    - https://github.com/SolaceProducts/solace-services-info
  *
  */
 public interface SolaceServiceCredentials {

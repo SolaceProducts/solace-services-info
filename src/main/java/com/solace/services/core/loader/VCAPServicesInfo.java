@@ -7,13 +7,12 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 class VCAPServicesInfo {
+
+	@JsonProperty("solace-pubsub") private List<SolaceMessagingServiceInfo> solacePubSubServices;
     @JsonProperty("solace-messaging") private List<SolaceMessagingServiceInfo> solaceMessagingServices;
-
+    
     public List<SolaceMessagingServiceInfo> getSolaceMessagingServices() {
-        return solaceMessagingServices;
+        return ( solacePubSubServices != null ) ?  solacePubSubServices : solaceMessagingServices;
     }
 
-    public void setSolaceMessagingServices(List<SolaceMessagingServiceInfo> solaceMessagingServices) {
-        this.solaceMessagingServices = solaceMessagingServices;
-    }
 }
