@@ -15,6 +15,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.runners.Parameterized.Parameter;
@@ -35,7 +37,10 @@ import static org.junit.runners.Parameterized.Parameters;
 public class SolaceCredentialsLoaderTest {
     private static final Logger logger = LogManager.getLogger(SolaceCredentialsLoaderTest.class);
     private static final ObjectMapper objectMapper = ObjectMapperSingleton.getInstance();
-    private static final String resourcesDir = "src/test/resources/";
+    private static final String RESOURCES_DIR = "src/test/resources/";
+    private static final String ALIAS_POSTFIX_PREDEFINED_ID = " With Predefined ID";
+    private static final String ALIAS_POSTFIX_NO_META_NAME = " Without Meta Name";
+    private static final String ALIAS_POSTFIX_MISSING_PROP = " With Missing Property";
 
     @Parameter(0) public String testManifestFormatAlias;
     @Parameter(1) public String testManifest;
@@ -47,10 +52,10 @@ public class SolaceCredentialsLoaderTest {
     public static Collection<Object[]> parameterData() throws IOException {
         // Run tests with two types of service labels: solace-messaging and solace-pubsub
         List<String> servicePaths = new ArrayList<>();
-        servicePaths.add(resourcesDir.concat("test-solace-messaging-services-manifest.json.template"));
-        servicePaths.add(resourcesDir.concat("test-solace-pubsub-services-manifest.json.template"));
+        servicePaths.add(RESOURCES_DIR.concat("test-solace-messaging-services-manifest.json.template"));
+        servicePaths.add(RESOURCES_DIR.concat("test-solace-pubsub-services-manifest.json.template"));
 
-        String credsPath = resourcesDir.concat("test-service-credentials.json.template");
+        String credsPath = RESOURCES_DIR.concat("test-service-credentials.json.template");
 
         // -- Setup JUnit Parameters --
         Set<Object[]> parameters = new HashSet<>();
@@ -62,6 +67,7 @@ public class SolaceCredentialsLoaderTest {
             // -- Setup Test Manifests --
             String testCreds = new String(Files.readAllBytes(Paths.get(credsPath)));
             String testCredsWithID = createManifestWithCredentialsID(testCreds);
+            String testCredsWithNoActiveHostname = testCreds.replaceAll("\"activeManagementHostname\"\\s*?:.*?,", "");
 
             String testCredsList = String.format("[%s]", testCreds);
             String testCredsListWithID = String.format("[%s]", testCredsWithID);
@@ -73,18 +79,20 @@ public class SolaceCredentialsLoaderTest {
             // -- Setup Test Objects --
             List<SolaceServiceCredentials> credsList = createTestCredsList(createTestCreds(testCreds));
             List<SolaceServiceCredentials> credsListWithIDs = createTestCredsList(createTestCreds(testCredsWithID));
+            List<SolaceServiceCredentials> credsListWithNoActiveHostname = createTestCredsList(createTestCreds(testCredsWithNoActiveHostname));
 
             List<SolaceServiceCredentials> testVCAPCreds = createTestVCAPCreds(testVCAP);
             List<SolaceServiceCredentials> testVCAPCredsWithID = createTestVCAPCreds(testVCAPWithID);
             List<SolaceServiceCredentials> testVCAPCredsWithoutMetaName = createTestVCAPCreds(testVCAPWithoutMetaName);
 
             parameters.add(new Object[]{serviceLabel + "-VCAP-Manifest", testVCAP, testVCAPCreds});
-            parameters.add(new Object[]{serviceLabel + "-VCAP-Manifest With Predefined ID", testVCAPWithID, testVCAPCredsWithID});
-            parameters.add(new Object[]{serviceLabel + "-VCAP-Manifest Without Meta Name", testVCAPWithoutMetaName, testVCAPCredsWithoutMetaName});
+            parameters.add(new Object[]{serviceLabel + "-VCAP-Manifest" + ALIAS_POSTFIX_PREDEFINED_ID, testVCAPWithID, testVCAPCredsWithID});
+            parameters.add(new Object[]{serviceLabel + "-VCAP-Manifest" + ALIAS_POSTFIX_NO_META_NAME, testVCAPWithoutMetaName, testVCAPCredsWithoutMetaName});
             parameters.add(new Object[]{serviceLabel + "-Multi-Service Credentials List", testCredsList, credsList});
-            parameters.add(new Object[]{serviceLabel + "-Multi-Service Credentials List With Predefined ID", testCredsListWithID, credsListWithIDs});
+            parameters.add(new Object[]{serviceLabel + "-Multi-Service Credentials List" + ALIAS_POSTFIX_PREDEFINED_ID, testCredsListWithID, credsListWithIDs});
             parameters.add(new Object[]{serviceLabel + "-Single-Service Credentials", testCreds, credsList});
-            parameters.add(new Object[]{serviceLabel + "-Single-Service Credentials With Predefined ID", testCredsWithID, credsListWithIDs});
+            parameters.add(new Object[]{serviceLabel + "-Single-Service Credentials" + ALIAS_POSTFIX_PREDEFINED_ID, testCredsWithID, credsListWithIDs});
+            parameters.add(new Object[]{serviceLabel + "-Single-Service Credentials" + ALIAS_POSTFIX_MISSING_PROP, testCredsWithNoActiveHostname, credsListWithNoActiveHostname});
         }
         return parameters;
     }
@@ -93,6 +101,7 @@ public class SolaceCredentialsLoaderTest {
     public void setupMockito() {
         MockitoAnnotations.initMocks(this);
         Mockito.when(manifestLoader.getManifest()).thenReturn(testManifest);
+        logger.info(String.format("Test Manifest: %s", testManifest));
     }
 
     @Test
@@ -124,6 +133,29 @@ public class SolaceCredentialsLoaderTest {
     @Test
     public void testManifestExists() {
         assertTrue(sscLoader.manifestExists());
+    }
+
+    @Test
+    public void testNonNullProperties() throws Exception {
+        SolaceServiceCredentials ssc = sscLoader.getSolaceServiceInfo();
+
+        boolean expectOneNull = testManifestFormatAlias.endsWith(ALIAS_POSTFIX_MISSING_PROP);
+        logger.info(String.format("Expecting a null property? %s", expectOneNull));
+
+        for (Method method : ssc.getClass().getMethods()) {
+            if ((!method.getName().startsWith("get") && !method.getName().startsWith("is")) ||
+                    method.getParameterTypes().length > 0) {
+                continue;
+            }
+            final Object value = method.invoke(ssc);
+            if (expectOneNull && value == null) {
+                logger.info(String.format("Method %s got expected null value", method.getName()));
+                expectOneNull = false;
+            } else {
+                logger.info(String.format("Method %s got value %s", method.getName(), value));
+                assertNotNull(String.format("Method %s got unexpected null value", method.getName()), value);
+            }
+        }
     }
 
     private static List<SolaceServiceCredentials> createTestVCAPCreds(String vcapManifest) throws IOException {

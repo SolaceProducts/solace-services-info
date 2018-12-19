@@ -33,5 +33,7 @@ public interface SolaceServiceCredentials {
     String getManagementPassword();
     String getManagementUsername();
     String getActiveManagementHostname();
+    String getDmrClusterName();
+    String getDmrClusterPassword();
     boolean isHA();
     }

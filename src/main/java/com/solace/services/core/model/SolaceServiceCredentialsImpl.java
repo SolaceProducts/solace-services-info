@@ -33,6 +33,8 @@ public class SolaceServiceCredentialsImpl implements SolaceServiceCredentials {
     private String managementPassword;
     private String managementUsername;
     private String activeManagementHostname;
+    private String dmrClusterName;
+    private String dmrClusterPassword;
 
     @Override
     public String getId() {
@@ -243,6 +245,24 @@ public class SolaceServiceCredentialsImpl implements SolaceServiceCredentials {
         this.activeManagementHostname = activeManagementHostname;
     }
 
+    @Override
+    public String getDmrClusterName() {
+        return dmrClusterName;
+    }
+
+    public void setDmrClusterName(String dmrClusterName) {
+        this.dmrClusterName = dmrClusterName;
+    }
+
+    @Override
+    public String getDmrClusterPassword() {
+        return dmrClusterPassword;
+    }
+
+    public void setDmrClusterPassword(String dmrClusterPassword) {
+        this.dmrClusterPassword = dmrClusterPassword;
+    }
+
     public boolean isHA(){
         return getSmfHost() != null && getSmfHost().contains(",");
     }
@@ -276,6 +296,8 @@ public class SolaceServiceCredentialsImpl implements SolaceServiceCredentials {
                 .append("managementPassword", managementPassword)
                 .append("managementUsername", managementUsername)
                 .append("activeManagementHostname", activeManagementHostname)
+                .append("dmrClusterName", dmrClusterName)
+                .append("dmrClusterPassword", dmrClusterPassword)
                 .toString();
     }
 
@@ -308,6 +330,8 @@ public class SolaceServiceCredentialsImpl implements SolaceServiceCredentials {
                 .append(managementPassword)
                 .append(managementUsername)
                 .append(activeManagementHostname)
+                .append(dmrClusterName)
+                .append(dmrClusterPassword)
                 .toHashCode();
     }
 
@@ -347,6 +371,8 @@ public class SolaceServiceCredentialsImpl implements SolaceServiceCredentials {
                 .append(managementPassword, other.managementPassword)
                 .append(managementUsername, other.managementUsername)
                 .append(activeManagementHostname, other.activeManagementHostname)
+                .append(dmrClusterName, other.dmrClusterName)
+                .append(dmrClusterPassword, other.dmrClusterPassword)
                 .isEquals();
     }
 }
