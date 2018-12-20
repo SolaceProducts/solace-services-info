@@ -64,6 +64,8 @@ public class SolaceServiceCredentialsImplTest {
         ssi.setManagementUsername("sample-mgmt-username");
         ssi.setManagementPassword("sample-mgmt-password");
         ssi.setActiveManagementHostname("vmr-medium-web");
+        ssi.setDmrClusterName("sample-dmr-cluster");
+        ssi.setDmrClusterPassword("sample-dmr-cluster-password");
         return ssi;
     }
 }
