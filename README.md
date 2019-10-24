@@ -89,7 +89,7 @@ The releases from this project are hosted in [Maven Central](https://mvnreposito
 
 ```groovy
 // Solace Services Info
-compile("com.solace.cloud.core:solace-services-info:0.3.+")
+compile("com.solace.cloud.core:solace-services-info:0.4.+")
 ```
 
 ### Using it with Maven
@@ -99,7 +99,7 @@ compile("com.solace.cloud.core:solace-services-info:0.3.+")
 <dependency>
   <groupId>com.solace.cloud.core</groupId>
   <artifactId>solace-services-info</artifactId>
-  <version>0.3.+</version>
+  <version>0.4.+</version>
 </dependency>
 ```
 
@@ -114,7 +114,7 @@ This project depends on maven for building. To build the jar locally, check out 
 This will build a jar file which will be named similar to the following:
 
 ```
-target/solace-services-info-0.3.0-SNAPSHOT.jar
+target/solace-services-info-0.4.0-SNAPSHOT.jar
 ```
 
 You can install this file in your maven repository locally.
