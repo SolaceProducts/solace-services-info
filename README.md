@@ -114,7 +114,7 @@ This project depends on maven for building. To build the jar locally, check out 
 This will build a jar file which will be named similar to the following:
 
 ```
-target/solace-services-info-0.4.0-SNAPSHOT.jar
+target/solace-services-info-0.5.0-SNAPSHOT.jar
 ```
 
 You can install this file in your maven repository locally.
