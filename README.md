@@ -1,6 +1,4 @@
-
-
-[![Build Status](https://travis-ci.org/SolaceProducts/solace-services-info.svg?branch=master)](https://travis-ci.org/SolaceProducts/solace-services-info)
+[![build](https://github.com/SolaceProducts/solace-services-info/actions/workflows/build-test.yml/badge.svg)](https://github.com/SolaceProducts/solace-services-info/actions/workflows/build-test.yml)
 
 # Solace Services Info
 
