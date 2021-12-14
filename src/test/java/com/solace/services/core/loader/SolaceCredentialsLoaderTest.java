@@ -3,8 +3,6 @@ package com.solace.services.core.loader;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.solace.services.core.model.SolaceServiceCredentials;
 import com.solace.services.core.model.SolaceServiceCredentialsImpl;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,6 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -35,7 +35,7 @@ import static org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
 public class SolaceCredentialsLoaderTest {
-    private static final Logger logger = LogManager.getLogger(SolaceCredentialsLoaderTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(SolaceCredentialsLoaderTest.class);
     private static final ObjectMapper objectMapper = ObjectMapperSingleton.getInstance();
     private static final String RESOURCES_DIR = "src/test/resources/";
     private static final String ALIAS_POSTFIX_PREDEFINED_ID = " With Predefined ID";

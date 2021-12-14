@@ -2,8 +2,6 @@ package com.solace.services.core.loader;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -13,6 +11,8 @@ import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,7 +53,7 @@ public class SolaceManifestLoaderTest {
     private SolaceManifestLoader manifestLoader;
 
     private static final String resourcesDir = "src/test/resources/";
-    private static final Logger logger = LogManager.getLogger(SolaceManifestLoaderTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(SolaceManifestLoaderTest.class);
     private static String testManifest;
     private static List<Triple<SolaceEnv, SolaceEnvSource, PostProcessor>> searchQueries;
 

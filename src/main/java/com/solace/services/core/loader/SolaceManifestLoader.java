@@ -2,8 +2,8 @@ package com.solace.services.core.loader;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,7 +35,7 @@ class SolaceManifestLoader {
     enum PostProcessor {NONE, FILE, REST}
 
     static final String MANIFEST_FILE_NAME = ".solaceservices";
-    private static final Logger logger = LogManager.getLogger(SolaceManifestLoader.class);
+    private static final Logger logger = LoggerFactory.getLogger(SolaceManifestLoader.class);
 
     private List<Triple<SolaceEnv, SolaceEnvSource, PostProcessor>> searchQueries;
 
@@ -89,7 +89,7 @@ class SolaceManifestLoader {
         Path filePath = Paths.get(dir.concat(File.separator).concat(fileName));
         if (Files.notExists(filePath)) {
             if (!dir.equals(System.getProperty("user.home")))
-                logger.warn(String.format("File %s does not exist", filePath));
+                logger.warn("File {} does not exist", filePath);
             return "";
         } else if (!Files.isReadable(filePath)) {
             logger.warn(String.format("%s cannot be opened for reading. Ignoring file parameter...", filePath));
@@ -100,7 +100,7 @@ class SolaceManifestLoader {
         try {
             fileContents = new String(Files.readAllBytes(filePath));
         } catch (IOException e) {
-            logger.error(String.format("Error reading %s", filePath));
+            logger.error("Error reading {}", filePath);
             return "";
         }
         return fileContents;
