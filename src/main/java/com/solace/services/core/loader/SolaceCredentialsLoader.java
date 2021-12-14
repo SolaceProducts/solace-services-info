@@ -6,8 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.solace.services.core.model.SolaceServiceCredentials;
 import com.solace.services.core.model.SolaceServiceCredentialsImpl;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -49,7 +49,7 @@ import java.util.Map;
 public class SolaceCredentialsLoader {
     private SolaceManifestLoader manifestLoader = new SolaceManifestLoader();
 
-    private static final Logger logger = LogManager.getLogger(SolaceCredentialsLoader.class);
+    private static final Logger logger = LoggerFactory.getLogger(SolaceCredentialsLoader.class);
     private static final ObjectReader defaultReader;
     private static final ObjectReader servicesReader;
     private static final ObjectReader credsListReader;
